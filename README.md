@@ -1,13 +1,13 @@
 # Net calculator
 NetCalculator is used for calculation of long arithmetic expressions.
 
-## info
+## Info
 It uses basic [C++14](https://isocpp.org/wiki/faq/cpp14-language) syntax, but nothing really complicated.
 It uses [boost](https://www.boost.org/) library. Version 1.65.1 was used.
 [CMake](https://cmake.org/) is the chosen build system using [ctest](https://cmake.org/Wiki/CMake/Testing_With_CTest).
 Also bash is used for a unit-test.
 
-##  project structure
+##  Project structure
 | folder       | Content              |
 | ------------ | -------------------- |
 | [/lib](/lib) | Shunting Yard library |
@@ -46,7 +46,7 @@ From the Build folder
   ctest -V
 ```
 
-## How to run
+## How to run?
 
 Just run with --help parameter and learn program options:
 ```shell
@@ -101,7 +101,7 @@ If you need to support an another type in class ShuntingYard just choose an anot
 'using Type = int;'
 But changing class ShuntingYard to template class is better way.
 
-## How to make template class ShuntingYard
+## How to make template class ShuntingYard?
 
 - rename file ShuntingYard.cpp to ShuntingYard.tpp (or *.ipp);
 - include ShuntingYard.tpp at the end of file ShuntingYard.tpp;
@@ -109,7 +109,7 @@ But changing class ShuntingYard to template class is better way.
 - change class ShuntingYard to template class: 'template <class Type> class ShuntingYard'
 - use it with necessary type 'ShuntingYard<size_t> shunting_yard;'
 
-## IPv4 and/or IPv6
+## IPv4 and/or IPv6?
 
 NetCalculator supports IPv4 only.
 If you need to support IPv6 modify class NetCalcCore.
