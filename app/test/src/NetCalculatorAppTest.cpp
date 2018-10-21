@@ -98,9 +98,11 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    if (expected_response != response_buffer)
-    {        
-        std::cerr << "Test failed. Invalid data received" << std::endl;
+    //I have got false positive comparision in gcc 7.3.0 for line with -O3 option
+    //if (expected_response != response_buffer)
+    if (expected_response != std::string(response_buffer, sizeof(response_buffer)))
+    {
+        std::cerr << "Test failed. Invalid data received. " << std::endl;
         return 1;
     }
 

@@ -33,6 +33,12 @@ boost::optional<Config> get_config(int argc, const char *argv[])
         return result;
     }
 
+    if (argc < 2 || vm.count("help"))
+    {
+        std::cout << desc << std::endl;
+        return result;
+    }
+
     if (!vm.count("port"))
     {
         std::cout << "Parameter 'port' is not defined." << std::endl;
@@ -59,12 +65,6 @@ boost::optional<Config> get_config(int argc, const char *argv[])
     {
         std::cout << "Parameter 'threads' must be positive." << std::endl;
         incomplete = true;
-    }
-
-    if (incomplete || argc < 2 || vm.count("help"))
-    {
-        std::cout << desc << std::endl;
-        return result;
     }
 
     if (default_config.clients < default_config.threads)
