@@ -4,7 +4,7 @@
 
 struct Config
 {
-    unsigned int port;
+    unsigned short port;
     unsigned int clients;
     unsigned int threads;
 };

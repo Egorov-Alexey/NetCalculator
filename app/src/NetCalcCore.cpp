@@ -1,8 +1,8 @@
-#include "Calculator.h"
+#include "NetCalcCore.h"
 
 #include <iostream>
 
-Calculator::Calculator(const Config& cfg_)
+NetCalcCore::NetCalcCore(const Config& cfg_)
     : cfg(cfg_),
       acceptor(service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), cfg.port))
 {
@@ -15,7 +15,7 @@ Calculator::Calculator(const Config& cfg_)
     }
 }
 
-Calculator::~Calculator()
+NetCalcCore::~NetCalcCore()
 {
     unsigned int thread_count = static_cast<unsigned int>(threads.size());
     for (unsigned int i = 0; i < thread_count; ++i)
@@ -37,7 +37,7 @@ Calculator::~Calculator()
     }
 }
 
-void Calculator::start(bool block /*= true*/)
+void NetCalcCore::start(bool block /*= false*/)
 {
     for (unsigned int i = 0; i < cfg.clients; ++i)
     {
@@ -57,28 +57,28 @@ void Calculator::start(bool block /*= true*/)
     }
 }
 
-void Calculator::stop()
+void NetCalcCore::stop()
 {
     service.stop();
 }
 
-void Calculator::handle_accept(unsigned int client_index, const boost::system::error_code& error)
+void NetCalcCore::handle_accept(unsigned int client_index, const boost::system::error_code& error)
 {
     if (error)
     {
-//#ifdef DEBUG
+#ifndef NDEBUG
         std::cerr << "Error " << error.value() << " on async_accept happens" << std::endl;
-//#endif
+#endif
         return;
     }
 
-//#ifdef DEBUG
+#ifndef NDEBUG
     std::cout << "Client: " << client_index << " accepted" << std::endl;
-//#endif
+#endif
     dispatch_async_receive(client_index);
 }
 
-void Calculator::handle_receive(unsigned int client_index, const boost::system::error_code& error, std::size_t bytes_transferred)
+void NetCalcCore::handle_receive(unsigned int client_index, const boost::system::error_code& error, std::size_t bytes_transferred)
 {
     if (error)
     {
@@ -87,41 +87,63 @@ void Calculator::handle_receive(unsigned int client_index, const boost::system::
         c.socket.close();
 
         dispatch_async_accept(client_index);
-#ifdef DEBUG
+#ifndef NDEBUG
         std::cerr << "Error " << error.value()
                   << " on async_receive happens for client: " << client_index << std::endl;
 #endif
         return;
     }
-#ifdef DEBUG
-    std::string s(clients[client_index].buffer, bytes_transferred);
-    std::cout << "Client: " << client_index << ", received: " << s << std::endl;
+#ifndef NDEBUG
+    std::cout << "Client: " << client_index << ", received: " << bytes_transferred << " bytes" << std::endl;
 #endif
     client& c = clients[client_index];
 
-    ShuntingYard::Result parse_result{c.shunting_yard.parse(c.buffer, bytes_transferred)};
     std::string str;
+    //Long expression like: '1 + 2\n3 - 4\n5 * 6\n7 / 8\n' could be received.
+    bool long_expression = false;
 
-    switch (parse_result.first)
+    do
     {
-        case ShuntingYard::ParseResult::Success:
-            str = std::to_string(parse_result.second);
-            c.socket.write_some(boost::asio::buffer(str));
-        case ShuntingYard::ParseResult::Incomplete:
-            dispatch_async_receive(client_index);
-            return;
-        case ShuntingYard::ParseResult::DivisionByZero:
-            str = "Division by zero";
-        case ShuntingYard::ParseResult::InvalidExpression:
-            str = "Invalid expression";
-    }
+        ShuntingYard::Result parse_result{
+            c.shunting_yard.parse(long_expression ? nullptr : c.buffer, long_expression ? 0ul : bytes_transferred)};
+
+        switch (parse_result.first)
+        {
+            case ShuntingYard::ParseResult::Success:
+            {
+                str = std::to_string(parse_result.second) + "\n";
+                boost::system::error_code ec;
+                boost::asio::write(c.socket, boost::asio::buffer(str), boost::asio::transfer_all(), ec);
+                if (ec)
+                {
+                    //An error occurred.
+                    c.socket.close();
+                    dispatch_async_accept(client_index);
+                    return;
+                }
+                if (long_expression = !c.shunting_yard.is_empty())
+                {
+                    //Continue processing long expression.
+                    break;
+                }
+            }
+            case ShuntingYard::ParseResult::Incomplete:
+                dispatch_async_receive(client_index);
+                return;
+            case ShuntingYard::ParseResult::DivisionByZero:
+                str = "Division by zero";
+                break;
+            case ShuntingYard::ParseResult::InvalidExpression:
+                str = "Invalid expression";
+        }
+    } while (long_expression);
 
     c.socket.write_some(boost::asio::buffer(str));
     c.socket.close();
     dispatch_async_accept(client_index);
 }
 
-void Calculator::dispatch_async_accept(unsigned int client_index)
+void NetCalcCore::dispatch_async_accept(unsigned int client_index)
 {
     auto l = [client_index, &self = *this](const boost::system::error_code& error)
     {
@@ -131,7 +153,7 @@ void Calculator::dispatch_async_accept(unsigned int client_index)
     acceptor.async_accept(clients[client_index].socket, l);
 }
 
-void Calculator::dispatch_async_receive(unsigned int client_index)
+void NetCalcCore::dispatch_async_receive(unsigned int client_index)
 {
     auto l = [client_index, &self = *this](const boost::system::error_code& error, std::size_t bytes_transferred)
     {

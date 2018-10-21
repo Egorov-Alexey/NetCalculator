@@ -24,8 +24,8 @@ public:
 
 	/**
 	 * This method parses partial expression.
-	 * Symbol '\n' must be end of expression.
-	 * The method skips symbols ' ' and '\t' in source data.
+     * Symbol '\n' must be at end of expression.
+     * The method skips symbols ' ', '\t' and '\r' in source data.
 	 * @param s[in] - partial expression.
 	 * @param len[len] - length of partial expression.
 	 * @retval <ShuntingYard::Success, value> - if end of expression was met and there were no any mistakes in expression.
@@ -37,6 +37,9 @@ public:
 
 	/** Clear parser to further processing after DivisionByZero and InvalidExpression. */
 	void clear();
+
+    /** Does ShuntingYard contain unprocessed data?*/
+    bool is_empty() const;
 
 private:
 	enum class BaseOperatorsEnum
@@ -64,8 +67,6 @@ private:
 
 	template <class T>
 	using Stack = std::stack<T, std::deque<T>>;
-
-	bool is_empty() const;
 
 	/** Calculate partial result using members operands and operators. */
 	bool calculate();

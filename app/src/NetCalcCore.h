@@ -10,13 +10,13 @@
 #include <condition_variable>
 #include <boost/asio.hpp>
 
-class Calculator
+class NetCalcCore
 {
 public:
-    Calculator(const Config& cfg_);
-    ~Calculator();
+    NetCalcCore(const Config& cfg_);
+    ~NetCalcCore();
 
-    void start(bool block = true);
+    void start(bool block = false);
     void stop();
 
 private:

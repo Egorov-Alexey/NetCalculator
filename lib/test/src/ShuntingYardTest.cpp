@@ -2,6 +2,7 @@
 
 #include <string>
 #include <iostream>
+#include <functional>
 
 struct ShuntingYardTestCase
 {
@@ -14,7 +15,11 @@ const ShuntingYardTestCase shunting_yard_test_array[] =
 {
 	{ "",					0,		ShuntingYard::ParseResult::Incomplete},
 	{ "\n",					0,		ShuntingYard::ParseResult::Success },
-	{ "123 + 456\n",		579,	ShuntingYard::ParseResult::Success },
+    { "123\n",              123,	ShuntingYard::ParseResult::Success },
+    { "-123\n",             -123,	ShuntingYard::ParseResult::Success },
+    { "(123)\n",            123,	ShuntingYard::ParseResult::Success },
+    { "(-123)\n",           -123,	ShuntingYard::ParseResult::Success },
+    { "123 + 456\n",		579,	ShuntingYard::ParseResult::Success },
 	{ "-123 + -456\n",		-579,	ShuntingYard::ParseResult::Success },
 	{ "(-123) + (-456)\n",	-579,	ShuntingYard::ParseResult::Success },
 	{ "(123 + 456\n",		0,		ShuntingYard::ParseResult::InvalidExpression },
@@ -115,11 +120,54 @@ bool shunting_yard_test2()
 	return result1 && result2;
 }
 
-
-int main(int argc, const char *argv[])
+bool shunting_yard_test3()
 {
-	bool result1 = shunting_yard_test1();
-	bool result2 = shunting_yard_test2();
+    std::string s = "(2 + 3) * 7 / 11\n(109 - 53) * 17 / 19\n103/((67 - 43) / 7)\n";
 
-    return result1 && result2 ? 0 : 1;
+    ShuntingYard shunting_yard;
+    ShuntingYard::Result result{shunting_yard.parse(s.data(), s.length())};
+    if (result.first != ShuntingYard::ParseResult::Success || result.second != 3 || shunting_yard.is_empty())
+    {
+        std::cerr << "Test3 for first call failed" << std::endl;
+        return false;
+    }
+
+    result = shunting_yard.parse(nullptr, 0);
+    if (result.first != ShuntingYard::ParseResult::Success || result.second != 50 || shunting_yard.is_empty())
+    {
+        std::cerr << "Test3 for second call failed" << std::endl;
+        return false;
+    }
+
+    result = shunting_yard.parse(nullptr, 0);
+    if (result.first != ShuntingYard::ParseResult::Success || result.second != 34 || !shunting_yard.is_empty())
+    {
+        std::cerr << "Test3 for third call failed" << std::endl;
+        return false;
+    }
+
+    std::cout << "Test3 passed" << std::endl;
+    return true;
+}
+
+const std::function<bool()> tests[] =
+{
+    shunting_yard_test1,
+    shunting_yard_test2,
+    shunting_yard_test3
+};
+
+int main()
+{
+    bool result{true};
+
+    for (auto& test: tests)
+    {
+        if (!test())
+        {
+            result = false;
+        }
+    }
+
+    return result ? 0 : 1;
 }

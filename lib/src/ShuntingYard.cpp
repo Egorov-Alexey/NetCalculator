@@ -1,5 +1,7 @@
 #include "ShuntingYard.h"
 
+#include <boost/lexical_cast.hpp>
+
 namespace
 {
 	//Auxiliary functions to fill ShuntingYard::base_operators.
@@ -118,7 +120,7 @@ ShuntingYard::LocalParseResult ShuntingYard::step_level_up(ShuntingYard* self, s
 {
 	ShuntingYard::LocalParseResult rc{ ParseResult::Success, false };
 
-	while (it != it_end && (*it == '(' || *it == ' ' || *it == '\t'))
+    while (it != it_end && (*it == '(' || *it == ' ' || *it == '\t' || *it == '\r'))
 	{
 		if (*it == '(')
 		{
@@ -172,9 +174,9 @@ ShuntingYard::LocalParseResult ShuntingYard::step_get_number(ShuntingYard* self,
 	std::string s(negative ? it - 1 : it, it2);
 	try
 	{
-		n = std::stoi(s);
+        n = boost::lexical_cast<Type>(s);
 	}
-	catch (...)
+    catch (const boost::bad_lexical_cast&)
 	{
 		rc.first = ParseResult::InvalidExpression;
 		return rc;
@@ -191,7 +193,7 @@ ShuntingYard::LocalParseResult ShuntingYard::step_level_down(ShuntingYard* self,
 {
 	ShuntingYard::LocalParseResult rc{ ParseResult::Success, false };
 
-	while (it != it_end && (*it == ')' || *it == ' ' || *it == '\t'))
+    while (it != it_end && (*it == ')' || *it == ' ' || *it == '\t' || *it == '\r'))
 	{
 		if (*it == ')')
 		{
@@ -253,7 +255,7 @@ ShuntingYard::LocalParseResult ShuntingYard::step_process_operator(ShuntingYard*
 {
 	ShuntingYard::LocalParseResult rc{ ParseResult::Success, false };
 
-	while (*it == ' ' || *it == '\t')
+    while (*it == ' ' || *it == '\t' || *it == '\r')
 	{
 		++it;
 	}
@@ -270,7 +272,7 @@ ShuntingYard::LocalParseResult ShuntingYard::step_process_operator(ShuntingYard*
 		case '+': base_operator = BaseOperatorsEnum::Plus;  break;
 		case '-': base_operator = BaseOperatorsEnum::Minus; break;
 		case '*': base_operator = BaseOperatorsEnum::Mult;  break;
-		case '/': base_operator = BaseOperatorsEnum::Divide; break;
+        case '/': base_operator = BaseOperatorsEnum::Divide;break;
 		default:
 			rc.first = ParseResult::InvalidExpression;
 			return rc;
