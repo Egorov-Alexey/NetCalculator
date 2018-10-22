@@ -4,9 +4,9 @@
 
 namespace
 {
-	inline unsigned int number_of_digits(size_t value)
+	inline unsigned int number_of_digits(int value)
 	{
-		unsigned int n = 0;
+		unsigned int n = value < 0 ? 1 : 0;
 
 		do
 		{

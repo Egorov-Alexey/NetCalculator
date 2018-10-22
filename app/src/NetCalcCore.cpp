@@ -121,7 +121,8 @@ void NetCalcCore::handle_receive(unsigned int client_index, const boost::system:
                     dispatch_async_accept(client_index);
                     return;
                 }
-                if (long_expression = !c.shunting_yard.is_empty())
+				long_expression = !c.shunting_yard.is_empty();
+				if (long_expression)
                 {
                     //Continue processing long expression.
                     break;

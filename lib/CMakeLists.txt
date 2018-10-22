@@ -9,7 +9,7 @@ set (LIBRARY_SRC_PATH  "${LIBRARY_MODULE_PATH}/src" )
 set (LIBRARY_INCLUDE_PATH  "${LIBRARY_MODULE_PATH}/include")
 
 #set includes
-include_directories (${LIBRARY_INCLUDE_PATH})
+include_directories (${LIBRARY_INCLUDE_PATH} ${Boost_INCLUDE_DIRS})
 
 #set sources
 file (GLOB LIB_HEADER_FILES "${LIBRARY_INCLUDE_PATH}/*.h")
