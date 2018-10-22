@@ -1,9 +1,17 @@
 # Net calculator
-NetCalculator is used for calculation of long arithmetic expressions.
+NetCalculator is used for calculation of a long arithmetic expressions.
+NetCalculator is a server multithreaded application.
+NetCalculator supports some simultaneous connections.
+
+NetCalculator:
+ - accepts a connection;
+ - receives an arithmetic expressions;
+ - checks a correctness of an expression and calculates a result during data receiving;
+ - sends a result to a client when receives '\n';
 
 ## Info
 It uses basic [C++14](https://isocpp.org/wiki/faq/cpp14-language) syntax, but nothing really complicated.
-It uses [boost](https://www.boost.org/) library. Version 1.65.1 was used.
+It uses [boost](https://www.boost.org/) library. Version 1.65.1 is used.
 [CMake](https://cmake.org/) is the chosen build system using [ctest](https://cmake.org/Wiki/CMake/Testing_With_CTest).
 Also bash is used for a unit-test.
 
@@ -19,7 +27,7 @@ Also bash is used for a unit-test.
 | [/gen](/gen) | Random arithmetic expression generator |
 
 ## Generate project
-Choose any free non-system port and set variable NC_FREE_TEST_PORT (unit-test needs it).
+Choose any free non-system port and set variable NC_FREE_TEST_PORT (a unit-test needs it).
 ```shell
 export NC_FREE_TEST_PORT=8080
 ```
@@ -71,23 +79,23 @@ For simple testing you can use telnet:
 ```shell
 telnet 127.0.0.1 8080
 ```
-Just input expression and press 'Enter'.
+Just input an expression and press 'Enter'.
 
 Also you can generate a very big expression:
 ```shell
 ./NetCalculatorGen 1024
 ```
 This command will generate a 1GB expression and will output it to the standard output stream.
-You can store an expression to a file:
+You can store it to a file:
 ```shell
-./NetCalculatorGen 1048576 > expr_1gb
+./NetCalculatorGen 1024 > expr_1gb
 ```
 
 For hard testing you can use nc:
 ```shell
 cat expr_1gb | nc 127.0.0.1 8080
 ```
-Definitely you can make requests from remote computer.
+Definitely you can make requests from a remote computer.
 
 ## Error processing
 
@@ -99,15 +107,15 @@ If division by zero was detected string "Division by zero" would be writen to a 
 [int] (-2147483648 to 2147483647) type is used.
 If you need to support an another type in class ShuntingYard just choose an another type at this line:
 'using Type = int;'
-But changing class ShuntingYard to template class is better way.
+But changing class ShuntingYard to a template class is better way.
 
 ## How to make template class ShuntingYard?
 
 - rename file ShuntingYard.cpp to ShuntingYard.tpp (or *.ipp);
 - include ShuntingYard.tpp at the end of file ShuntingYard.tpp;
 - delete 'using Type = int;'
-- change class ShuntingYard to template class: 'template <class Type> class ShuntingYard'
-- use it with necessary type 'ShuntingYard<size_t> shunting_yard;'
+- change class ShuntingYard to a template class: 'template <class Type> class ShuntingYard'
+- use it with a necessary type 'ShuntingYard<size_t> shunting_yard;'
 
 ## IPv4 and/or IPv6?
 
@@ -118,12 +126,12 @@ If you need to support IPv6 modify class NetCalcCore.
 
 - generate a big expression using ExpressionGenerator;
 - run ShuntingYardPerf and remember a result;
-- make some changes in teh algorithm;
+- make some changes in the algorithm;
 - run ShuntingYardPerf again and compare results;
 
 ## Known issues
 
-- NetCalculatorApp does not use any BitInt library and does not check result overflow.
+- NetCalculatorApp does not use any BitInt library and does not check a result overflow.
 - ExpressionGenerator generate expressions that slightly higher than a requested size.
 - ExpressionGenerator generate does not generate operation '/' because random expression generation is used and it often generates expressions like '(5/(2/3))'. NetCalculatorApp returns 'division by zero' for a such expression.
 - ShuntingYard algorithm does not support explicit positive numbers. E.g. (7 + +5)
