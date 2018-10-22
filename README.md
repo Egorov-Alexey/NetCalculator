@@ -1,11 +1,11 @@
 # Net calculator
-NetCalculator is used for calculation of a long arithmetic expressions.
+NetCalculator is used for calculation of long arithmetic expressions.
 NetCalculator is a server multithreaded application.
 NetCalculator supports some simultaneous connections.
 
 NetCalculator:
  - accepts a connection;
- - receives an arithmetic expressions;
+ - receives an arithmetic expression;
  - checks a correctness of an expression and calculates a result during data receiving;
  - sends a result to a client when receives '\n';
 
