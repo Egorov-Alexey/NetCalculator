@@ -1,12 +1,7 @@
 #pragma once
 
-#include <boost/optional.hpp>
+#include <Config_s.h>
 
-struct Config
-{
-    unsigned short port;
-    unsigned int clients;
-    unsigned int threads;
-};
+#include <boost/optional.hpp>
 
 boost::optional<Config> get_config(int argc, const char *argv[]);

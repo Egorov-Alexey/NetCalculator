@@ -6,9 +6,10 @@ set (APP_NAME "${PROJECT_NAME}App")
 #configure directories
 set (APP_MODULE_PATH "${PROJECT_SOURCE_DIR}/app")
 set (APP_SRC_PATH  "${APP_MODULE_PATH}/src" )
+set (APP_INCLUDE_PATH  "${APP_MODULE_PATH}/include" )
 
 #set includes
-include_directories (${LIBRARY_INCLUDE_PATH} ${Boost_INCLUDE_DIRS})
+include_directories (${APP_INCLUDE_PATH} ${LIBRARY_INCLUDE_PATH} ${Boost_INCLUDE_DIRS})
 
 #set sources
 file (GLOB APP_SOURCE_FILES "${APP_SRC_PATH}/*.cpp")
