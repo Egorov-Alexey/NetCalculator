@@ -83,16 +83,7 @@ void NetCalcCore::handle_receive(unsigned int client_index, const boost::system:
 {
     if (error)
     {
-        client& c = clients[client_index];
-        c.shunting_yard.clear();
-        c.socket.close();
-
-#ifndef NDEBUG
-        std::cerr << "Error " << error.value()
-                  << " on async_receive happens for client: " << client_index << std::endl;
-#endif
-
-        dispatch_async_accept(client_index);
+        on_receive_error(client_index, error);
         return;
     }
 
@@ -103,27 +94,25 @@ void NetCalcCore::handle_receive(unsigned int client_index, const boost::system:
     parse_result(client_index, bytes_transferred);
 }
 
+void NetCalcCore::on_receive_error(unsigned int client_index, const boost::system::error_code& error)
+{
+    client& c = clients[client_index];
+    c.shunting_yard.clear();
+    c.socket.close();
+
+#ifndef NDEBUG
+    std::cerr << "Error " << error.value()
+              << " on async_receive happens for client: " << client_index << std::endl;
+#endif
+
+    dispatch_async_accept(client_index);
+}
+
 void NetCalcCore::handle_send(unsigned int client_index, bool processing_error, const boost::system::error_code& error, std::size_t bytes_transferred)
 {
     if (error || processing_error)
     {
-        client& c = clients[client_index];
-        c.shunting_yard.clear();
-        c.socket.close();
-
-#ifndef NDEBUG
-        if (processing_error)
-        {
-            std::cerr << "Processing error happens for client: " << client_index << std::endl;
-        }
-        else
-        {
-            std::cerr << "Error " << error.value()
-                      << " on async_write happens for client: " << client_index << std::endl;
-        }
-#endif
-
-        dispatch_async_accept(client_index);
+        on_send_error(client_index, processing_error, error);
         return;
     }
 
@@ -140,6 +129,27 @@ void NetCalcCore::handle_send(unsigned int client_index, bool processing_error, 
     {
         dispatch_async_receive(client_index);
     }
+}
+
+void NetCalcCore::on_send_error(unsigned int client_index, bool processing_error, const boost::system::error_code& error)
+{
+    client& c = clients[client_index];
+    c.shunting_yard.clear();
+    c.socket.close();
+
+#ifndef NDEBUG
+    if (processing_error)
+    {
+        std::cerr << "Processing error happens for client: " << client_index << std::endl;
+    }
+    else
+    {
+        std::cerr << "Error " << error.value()
+                  << " on async_write happens for client: " << client_index << std::endl;
+    }
+#endif
+
+    dispatch_async_accept(client_index);
 }
 
 void NetCalcCore::dispatch_async_accept(unsigned int client_index)

@@ -1,4 +1,4 @@
-#include "Config.h"
+#include <Config.h>
 #include "NetCalcCore.h"
 
 #include <boost/asio/signal_set.hpp>

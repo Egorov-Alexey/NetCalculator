@@ -39,7 +39,9 @@ private:
 private:
     void handle_accept(unsigned int client_index, const boost::system::error_code& error);
     void handle_receive(unsigned int client_index, const boost::system::error_code& error, std::size_t bytes_transferred);
+    void on_receive_error(unsigned int client_index, const boost::system::error_code& error);
     void handle_send(unsigned int client_index, bool processing_error, const boost::system::error_code& error, std::size_t bytes_transferred);
+    void on_send_error(unsigned int client_index, bool processing_error, const boost::system::error_code& error);
 
     void dispatch_async_accept(unsigned int client_index);
     void dispatch_async_receive(unsigned int client_index);
