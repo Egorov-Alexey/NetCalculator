@@ -29,9 +29,9 @@ namespace
 
 const std::function<ShuntingYard::LocalParseResult(ShuntingYard* self, std::string::const_iterator&, std::string::const_iterator)> ShuntingYard::steps[5] =
 {
-    ShuntingYard::step_level_up,
+	ShuntingYard::step_level_up_and_skip,
     ShuntingYard::step_get_number,
-    ShuntingYard::step_level_down,
+	ShuntingYard::step_level_down_and_skip,
     ShuntingYard::step_check_end_of_expression,
     ShuntingYard::step_process_operator
 };
@@ -41,12 +41,9 @@ const unsigned int ShuntingYard::order = 2;
 
 ShuntingYard::Result ShuntingYard::parse(const char* s, size_t len)
 {
-	Result result{ParseResult::Success, Type{}};
-
-	//Only '\n' in source data.
 	if (len == 1 && s[0] == '\n' && is_empty())
-	{
-		return result;
+	{	//Only '\n' in source data.
+		return std::make_pair(ParseResult::Success, Type{});
 	}
 
 	//Make string to parse.
@@ -70,18 +67,16 @@ ShuntingYard::Result ShuntingYard::parse(const char* s, size_t len)
 			{
 				clear();
 			}
-
-			result.first = rc.first;
-			return result;
+			return std::make_pair(rc.first, Type{});
 		}
 	}
 
 	//Make result.
-	result.second = operands.top();
-	step = 0;
+	Type value = operands.top();
 	operands.pop();
+	step = 0;
 
-	return result;
+	return std::make_pair(ParseResult::Success, value);
 };
 
 void ShuntingYard::clear()
@@ -92,6 +87,7 @@ void ShuntingYard::clear()
 	operands.swap(operands_);
 	Stack<Operator> operators_;
 	operators.swap(operators_);
+	remainder.clear();
 }
 
 bool ShuntingYard::is_empty() const
@@ -116,11 +112,9 @@ bool ShuntingYard::calculate()
 	return true;
 }
 
-ShuntingYard::LocalParseResult ShuntingYard::step_level_up(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
+ShuntingYard::LocalParseResult ShuntingYard::step_level_up_and_skip(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
 {
-	ShuntingYard::LocalParseResult rc{ ParseResult::Success, false };
-
-    while (it != it_end && (*it == '(' || *it == ' ' || *it == '\t' || *it == '\r'))
+	while (it != it_end && (*it == '(' || is_skip_symbol(*it)))
 	{
 		if (*it == '(')
 		{
@@ -131,20 +125,16 @@ ShuntingYard::LocalParseResult ShuntingYard::step_level_up(ShuntingYard* self, s
 
 	if (it == it_end)
     {
-		rc.first = ParseResult::Incomplete;
-		return rc;
+		return std::make_pair(ParseResult::Incomplete, false);
 	}
 
     ++(self->step);
-	return rc;
+	return std::make_pair(ParseResult::Success, false);
 }
 
 ShuntingYard::LocalParseResult ShuntingYard::step_get_number(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
-{
-	ShuntingYard::LocalParseResult rc{ ParseResult::Success, false };
-
+{	//Assume that 'it' can not be equal to 'it_end' at the beginnig. Skip symbols are absent at the beginnig.
 	bool negative = (*it == '-');
-
 	if (negative)
 	{
 		++it;
@@ -153,54 +143,42 @@ ShuntingYard::LocalParseResult ShuntingYard::step_get_number(ShuntingYard* self,
 	if (it == it_end)
 	{
         self->remainder = '-';
-		rc.first = ParseResult::Incomplete;
-		return rc;
+		return std::make_pair(ParseResult::Incomplete, false);
 	}
 
 	std::string::const_iterator it2 = get_first_not_a_digit(it, it_end);
 	if (it2 == it_end)
 	{
         self->remainder.assign(negative ? it - 1 : it, it_end);
-		rc.first = ParseResult::Incomplete;
-		return rc;
+		return std::make_pair(ParseResult::Incomplete, false);
 	}
 	else if (it == it2)
 	{
-		rc.first = ParseResult::InvalidExpression;
-		return rc;
+		return std::make_pair(ParseResult::InvalidExpression, false);
 	}
 
-	Type n;
-	std::string s(negative ? it - 1 : it, it2);
-	try
+	std::pair<Type, bool> n{convert(std::string(negative ? it - 1 : it, it2))};
+	if (!n.second)
 	{
-        n = boost::lexical_cast<Type>(s);
-	}
-    catch (const boost::bad_lexical_cast&)
-	{
-		rc.first = ParseResult::InvalidExpression;
-		return rc;
+		return std::make_pair(ParseResult::InvalidExpression, false);
 	}
 
-    self->operands.push(n);
+	self->operands.push(n.first);
 	it = it2;
 
     ++(self->step);
-	return rc;
+	return std::make_pair(ParseResult::Success, false);
 }
 
-ShuntingYard::LocalParseResult ShuntingYard::step_level_down(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
+ShuntingYard::LocalParseResult ShuntingYard::step_level_down_and_skip(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
 {
-	ShuntingYard::LocalParseResult rc{ ParseResult::Success, false };
-
-    while (it != it_end && (*it == ')' || *it == ' ' || *it == '\t' || *it == '\r'))
+	while (it != it_end && (*it == ')' || is_skip_symbol(*it)))
 	{
 		if (*it == ')')
 		{
             if (!self->level)
             {
-				rc.first = ParseResult::InvalidExpression;
-				return rc;
+				return std::make_pair(ParseResult::InvalidExpression, false);
 			}
 
             self->level -= ShuntingYard::order;
@@ -210,32 +188,29 @@ ShuntingYard::LocalParseResult ShuntingYard::step_level_down(ShuntingYard* self,
 
 	if (it == it_end)
 	{
-		rc.first = ParseResult::Incomplete;
-		return rc;
+		return std::make_pair(ParseResult::Incomplete, false);
 	}
 
     ++(self->step);
-	return rc;
+	return std::make_pair(ParseResult::Success, false);
 }
 
 ShuntingYard::LocalParseResult ShuntingYard::step_check_end_of_expression(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
-{
-	ShuntingYard::LocalParseResult rc{ ParseResult::Success, false };
+{	//Assume that 'it' can not be equal to 'it_end' at the beginnig. Skip symbols are absent at the beginnig.
+	bool found = false;
 
 	if (*it == '\n')
 	{
         if (self->level)
 		{
-			rc.first = ParseResult::InvalidExpression;
-			return rc;
+			return std::make_pair(ParseResult::InvalidExpression, false);
 		}
 
         while (!self->operators.empty())
 		{
             if (!self->calculate())
 			{
-				rc.first = ParseResult::DivisionByZero;
-				return rc;
+				return std::make_pair(ParseResult::DivisionByZero, false);
 			}
 		}
 
@@ -244,38 +219,26 @@ ShuntingYard::LocalParseResult ShuntingYard::step_check_end_of_expression(Shunti
             self->remainder.assign(it, it_end);
 		}
 
-		rc.second = true;
+		found = true;
 	}
 
-    ++(self->step);
-	return rc;
+	++(self->step);
+	return std::make_pair(ParseResult::Success, found);
 }
 
 ShuntingYard::LocalParseResult ShuntingYard::step_process_operator(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
 {
-	ShuntingYard::LocalParseResult rc{ ParseResult::Success, false };
-
-    while (*it == ' ' || *it == '\t' || *it == '\r')
-	{
-		++it;
-	}
+	while (it != it_end && is_skip_symbol(*it)) { ++it; }
 
 	if (it == it_end)
 	{
-		rc.first = ParseResult::Incomplete;
-		return rc;
+		return std::make_pair(ParseResult::Incomplete, false);
 	}
 
-	BaseOperatorsEnum base_operator;
-	switch (*it++)
+	BaseOperatorsEnum base_operator{get_base_operator(*it++)};
+	if (base_operator == BaseOperatorsEnum::Invalid)
 	{
-		case '+': base_operator = BaseOperatorsEnum::Plus;  break;
-		case '-': base_operator = BaseOperatorsEnum::Minus; break;
-		case '*': base_operator = BaseOperatorsEnum::Mult;  break;
-        case '/': base_operator = BaseOperatorsEnum::Divide;break;
-		default:
-			rc.first = ParseResult::InvalidExpression;
-			return rc;
+		return std::make_pair(ParseResult::InvalidExpression, false);
 	}
 
     unsigned int priority = base_operators[static_cast<int>(base_operator)].base_priority + self->level;
@@ -284,13 +247,47 @@ ShuntingYard::LocalParseResult ShuntingYard::step_process_operator(ShuntingYard*
 	{
         if (!self->calculate())
 		{
-			rc.first = ParseResult::DivisionByZero;
-			return rc;
+			return std::make_pair(ParseResult::DivisionByZero, false);
 		}
 	}
 
     self->operators.push(Operator{ priority, base_operator });
-
     self->step = 0;
-	return rc;
+
+	return std::make_pair(ParseResult::Success, false);
+}
+
+bool ShuntingYard::is_skip_symbol(char op)
+{
+	return op == ' ' || op == '\t' || op == '\r';
+}
+
+ShuntingYard::BaseOperatorsEnum ShuntingYard::get_base_operator(char op)
+{
+	switch (op)
+	{
+		case '+': return BaseOperatorsEnum::Plus;
+		case '-': return BaseOperatorsEnum::Minus;
+		case '*': return BaseOperatorsEnum::Mult;
+		case '/': return BaseOperatorsEnum::Divide;
+	}
+
+	return BaseOperatorsEnum::Invalid;
+}
+
+std::pair<ShuntingYard::Type, bool> ShuntingYard::convert(const std::string& value)
+{
+	std::pair<Type, bool> result{Type{}, true};
+
+	try
+	{
+		result.first = boost::lexical_cast<Type>(value);
+	}
+	catch (const boost::bad_lexical_cast&)
+	{
+		result.second = false;
+		return result;
+	}
+
+	return  result;
 }

@@ -3,10 +3,24 @@
 #include <boost/asio.hpp>
 #include <boost/optional.hpp>
 
-struct Socket
+namespace
 {
-    ~Socket() { if (s.is_open()) s.close(); }
-    boost::asio::ip::tcp::socket s;
+
+struct TestCase
+{
+	bool need_conect;
+	bool need_disconnect;
+	std::string request;
+	std::string response;
+};
+
+const TestCase test_cases[] =
+{
+	{true,  false, "1 + 2\n", "3\n"},
+	{false, false, "3 + 4\n", "7\n"},
+	{false, true,  "(1 + 2\n", "Invalid expression\n"},
+	{true,  true,  "(5/(3/7)\n", "Division by zero\n"},
+	{true,  true,  "(2 + 3) * 7 / 11\n(109 - 53) * 17 / 19\n103/((67 - 43) / 7)\n", "3\n50\n34\n"}
 };
 
 template <typename SyncReadStream, typename MutableBufferSequence>
@@ -39,74 +53,134 @@ size_t readWithTimeout(SyncReadStream& s,
 
     return readed;
 }
+}
+
+class NetCalculatorAppTest
+{
+public:
+	NetCalculatorAppTest(int argc, const char* const* argv) :
+		endpoint(make_endpoint(argc, argv)),
+		socket(service) {}
+
+	~NetCalculatorAppTest() { if (socket.is_open()) socket.close(); }
+
+	bool connect();
+	bool exchange(const std::string& request, std::string& response, size_t need_to_read);
+	void disconnect() { if (socket.is_open()) socket.close();}
+
+private:
+	static boost::asio::ip::tcp::endpoint make_endpoint(int argc, const char* const* argv);
+
+private:
+	boost::asio::io_service service;
+	boost::asio::ip::tcp::endpoint endpoint;
+	boost::asio::ip::tcp::socket socket;
+};
+
+boost::asio::ip::tcp::endpoint NetCalculatorAppTest::make_endpoint(int argc, const char* const* argv)
+{
+	if (argc != 3)
+	{
+		throw std::runtime_error("Invalid arguments.");
+	}
+
+	boost::system::error_code ec;
+	boost::asio::ip::address address = boost::asio::ip::address::from_string(argv[1], ec);
+	if (ec)
+	{
+		throw std::runtime_error("Invalid arguments.");
+	}
+
+	return boost::asio::ip::tcp::endpoint(address, std::atoi(argv[2]));
+}
+
+bool NetCalculatorAppTest::connect()
+{
+	boost::system::error_code ec;
+	socket.connect(endpoint, ec);
+
+	if (ec)
+	{
+		std::cerr << "Test failed. Could not connect to host" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+bool NetCalculatorAppTest::exchange(const std::string& request, std::string& response, size_t need_to_read)
+{
+	boost::system::error_code ec;
+	boost::asio::write(socket, boost::asio::buffer(request), boost::asio::transfer_all(), ec);
+	if (ec)
+	{
+		std::cerr << "Test failed. Could not send request." << std::endl;
+		return false;
+	}
+
+	std::vector<char> response_buffer(need_to_read, 0);
+	size_t readed = 0;
+
+	boost::asio::deadline_timer timer(service);
+	timer.expires_from_now(boost::posix_time::seconds(5));
+	while (!ec && (need_to_read - readed))
+	{
+		size_t n = readWithTimeout(socket, boost::asio::buffer(&response_buffer[readed], need_to_read - readed), timer, ec);
+		if (!ec)
+		{
+			readed += n;
+		}
+	}
+
+	if (ec)
+	{
+		std::cerr << "Test failed. Could not get response." << std::endl;
+		return false;
+	}
+
+	response.assign(response_buffer.data(), readed);
+
+	return true;
+}
 
 int main(int argc, char* argv[])
 {
-    if (argc != 3)
-    {
-        std::cerr << "Test failed. Invalid arguments. " << std::endl;
-        return 1;
-    }
+	try
+	{
+		NetCalculatorAppTest test(argc, argv);
 
-    boost::system::error_code ec;
-    boost::asio::ip::address address = boost::asio::ip::address::from_string(argv[1], ec);
-    if (ec)
-    {
-        std::cerr << "Test failed. Invalid address: " << argv[1] << std::endl;
-        return 1;
-    }
+		for (const TestCase& test_case : test_cases)
+		{
+			if (test_case.need_conect && !test.connect())
+			{
+				return 1;
+			}
 
-    boost::asio::io_service service;
-    boost::asio::ip::tcp::endpoint endpoint(address, std::atoi(argv[2]));
-    Socket socket{boost::asio::ip::tcp::socket{service}};
+			std::string response;
+			if (!test.exchange(test_case.request, response, test_case.response.size()))
+			{
+				return 1;
+			}
 
-    socket.s.connect(endpoint, ec);
-    if (ec)
-    {
-        std::cerr << "Test failed. Could not connect to " << argv[1] << ":" << std::atoi(argv[2]) << std::endl;
-        return 1;
-    }
+			if (response != test_case.response)
+			{
+				std::cout << response << std::endl << test_case.response << std::endl;
+				std::cerr << "Test failed. Invalid response received" << std::endl;
+				return 1;
+			}
 
-    std::string request = "(2 + 3) * 7 / 11\n(109 - 53) * 17 / 19\n103/((67 - 43) / 7)\n";
-    boost::asio::write(socket.s, boost::asio::buffer(request), boost::asio::transfer_all(), ec);
-    if (ec)
-    {
-        std::cerr << "Test failed. Could not send request." << std::endl;
-        return 1;
-    }
+			if (test_case.need_disconnect)
+			{
+				test.disconnect();
+			}
+			std::cout << "Success" << std::endl;
+		}
+	}
+	catch (const std::runtime_error& e)
+	{
+		std::cerr << "Test failed. " <<  e.what() << std::endl;
+		return 1;
+	}
 
-    const std::string expected_response{"3\n50\n34\n"};
-
-    char response_buffer[8];
-    size_t readed = 0;
-    size_t need_to_read = sizeof(response_buffer);
-
-    boost::asio::deadline_timer timer(service);
-    timer.expires_from_now(boost::posix_time::seconds(5));
-    while (!ec && (need_to_read - readed))
-    {
-        size_t n = readWithTimeout(socket.s, boost::asio::buffer(&response_buffer[readed], need_to_read - readed), timer, ec);
-        if (!ec)
-        {
-            readed += n;
-        }
-    }
-
-    if (ec)
-    {
-        std::cerr << "Test failed. Could not get response." << std::endl;
-        return 1;
-    }
-
-    //I have got false positive comparision in gcc 7.3.0 for line with -O3 option
-    //if (expected_response != response_buffer)
-    if (expected_response != std::string(response_buffer, sizeof(response_buffer)))
-    {
-        std::cerr << "Test failed. Invalid data received. " << std::endl;
-        return 1;
-    }
-
-    std::cout << "Test passed" << std::endl;
     return 0;
 }
-

@@ -47,7 +47,8 @@ private:
 		Plus,
 		Minus,
 		Mult,
-		Divide
+		Divide,
+		Invalid
 	};
 
 	struct BaseOperators
@@ -72,11 +73,15 @@ private:
 	bool calculate();
 
 	/** Methods of state machine*/
-    static LocalParseResult step_level_up(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end);
+	static LocalParseResult step_level_up_and_skip(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end);
     static LocalParseResult step_get_number(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end);
-    static LocalParseResult step_level_down(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end);
+	static LocalParseResult step_level_down_and_skip(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end);
     static LocalParseResult step_check_end_of_expression(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end);
     static LocalParseResult step_process_operator(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end);
+
+	static bool is_skip_symbol(char op);
+	static BaseOperatorsEnum get_base_operator(char op);
+	static std::pair<Type, bool> convert(const std::string& value);
 
 private:
     static const std::function<LocalParseResult(ShuntingYard*, std::string::const_iterator&, std::string::const_iterator)> steps[5];
