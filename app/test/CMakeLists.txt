@@ -1,9 +1,9 @@
 # CMake build : main application test
 
 #configure variables
-set (TEST1_APP_NAME "${APP_NAME}Test1")
-set (TEST2_APP_NAME "${APP_NAME}Test2")
-set (TEST3_APP_NAME "${APP_NAME}Test3")
+set (TEST1_APP_NAME "${APP_NAME}_SimpleTest")
+set (TEST2_APP_NAME "${APP_NAME}_NetCalcCoreTest")
+set (TEST3_APP_NAME "${APP_NAME}_ConfigTest")
 
 #configure directories
 set (TEST_MODULE_PATH "${APP_MODULE_PATH}/test")

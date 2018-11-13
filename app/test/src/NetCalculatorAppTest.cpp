@@ -16,7 +16,7 @@ const TestCase test_cases[] =
 	{true,  false, "1 + 2\n", "3\n"},
 	{false, false, "3 + 4\n", "7\n"},
 	{false, true,  "(1 + 2\n", "Invalid expression\n"},
-	{true,  true,  "(5/(3/7)\n", "Division by zero\n"},
+    {true,  true,  "5/(3/7)\n", "Division by zero\n"},
 	{true,  true,  "(2 + 3) * 7 / 11\n(109 - 53) * 17 / 19\n103/((67 - 43) / 7)\n", "3\n50\n34\n"}
 };
 
