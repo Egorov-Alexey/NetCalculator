@@ -7,7 +7,6 @@
 bool shunting_yard_perf(const char* filename)
 {
     std::ifstream f(filename);
-
     if (!f)
     {
         std::cerr << "File " << filename << " not found" << std::endl;
@@ -16,8 +15,8 @@ bool shunting_yard_perf(const char* filename)
 
     ShuntingYard shunting_yard;
     ShuntingYard::Result rc{ ShuntingYard::ParseResult::Incomplete, 0 };
-
     std::chrono::time_point<std::chrono::system_clock> start_point{ std::chrono::system_clock::now() };
+
     while (rc.first == ShuntingYard::ParseResult::Incomplete)
     {
         char buffer[8192];
@@ -36,10 +35,10 @@ bool shunting_yard_perf(const char* filename)
             rc = shunting_yard.parse(buffer, static_cast<size_t>(f.gcount()));
         }
     }
-    std::chrono::time_point<std::chrono::system_clock> end_point{ std::chrono::system_clock::now() };
 
     if (rc.first == ShuntingYard::ParseResult::Success)
     {
+		std::chrono::time_point<std::chrono::system_clock> end_point{ std::chrono::system_clock::now() };
         auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end_point - start_point);
         std::cout << "Result of expression is: " << rc.second << ", spend time: " << milliseconds.count() << " milliseconds.";
     }
@@ -47,8 +46,6 @@ bool shunting_yard_perf(const char* filename)
     {
         std::cerr << "Could not compute an expression. " << std::endl;
     }
-
-    f.close();
 
     return rc.first == ShuntingYard::ParseResult::Success;
 }

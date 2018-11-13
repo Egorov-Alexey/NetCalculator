@@ -2,21 +2,29 @@
 #include <limits>
 #include <random>
 
-namespace
+inline unsigned int number_of_digits(int value)
 {
-	inline unsigned int number_of_digits(int value)
+	unsigned int n = value < 0 ? 1 : 0;
+
+	do
 	{
-		unsigned int n = value < 0 ? 1 : 0;
+		++n;
+		value /= 10;
+	} while (value);
 
-		do
-		{
-			++n;
-			value /= 10;
-		} while (value);
+	return n;
+}
 
-		return n;
+char get_operator(int index)
+{
+	switch (index)
+	{
+		case 0: return '+';
+		case 1: return '-';
+		case 2: return '*';
+		case 3: return '/';
 	}
-
+	return ' ';
 }
 
 void generate_random_expr(std::ostream& stream, unsigned int length)
@@ -26,7 +34,6 @@ void generate_random_expr(std::ostream& stream, unsigned int length)
     std::uniform_int_distribution<> distr_0_1(0, 1);
     std::uniform_int_distribution<> number_distr(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
     std::uniform_int_distribution<> operation_distr(0, 2);
-
     unsigned int i = 0;
 
 	while (i < length)
@@ -53,23 +60,13 @@ void generate_random_expr(std::ostream& stream, unsigned int length)
 		}
 
 		//4. Generate operator
-		switch (operation_distr(random_engine))
-		{
-			case 0: stream << '+'; break;
-			case 1: stream << '-'; break;
-			case 2: stream << '*'; break;
-			case 3: stream << '/';
-		}
+		stream << get_operator(operation_distr(random_engine));
 		++i;
 	}
 
 	//Finalize
 	stream << number_distr(random_engine);
-
-	for (i = 0; i < open_brackets; ++i)
-	{
-		stream << ')';
-	}
+	for (i = 0; i < open_brackets; ++i) { stream << ')'; }
 	stream << '\n';
 }
 

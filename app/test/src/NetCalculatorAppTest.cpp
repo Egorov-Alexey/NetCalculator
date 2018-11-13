@@ -3,9 +3,6 @@
 #include <boost/asio.hpp>
 #include <boost/optional.hpp>
 
-namespace
-{
-
 struct TestCase
 {
 	bool need_conect;
@@ -52,7 +49,6 @@ size_t readWithTimeout(SyncReadStream& s,
     }
 
     return readed;
-}
 }
 
 class NetCalculatorAppTest
