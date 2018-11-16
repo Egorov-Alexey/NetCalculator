@@ -1,12 +1,15 @@
 #include <Config.h>
+
 #include <iostream>
 #include <vector>
+#include <thread>
 
-namespace
-{
 bool operator==(const Config& lhs, const Config& rhs)
 {
-    return lhs.port == rhs.port && lhs.clients == rhs.clients && lhs.threads == rhs.threads;
+	return lhs.address == rhs.address &&
+		lhs.port == rhs.port &&
+		lhs.clients == rhs.clients &&
+		lhs.threads == rhs.threads;
 }
 
 struct TestData
@@ -15,6 +18,16 @@ struct TestData
     Config config;
     std::vector<const char*> args;
 };
+
+std::ostream& operator<<(std::ostream& s, const TestData& test_case)
+{
+	for (auto& arg: test_case.args)
+	{
+		s << arg << " ";
+	}
+
+	return s;
+}
 
 bool test_config(const TestData& test_data)
 {
@@ -28,33 +41,59 @@ bool test_config(const TestData& test_data)
     return test_data.config == config.get();
 }
 
-const TestData TestCases[] =
+unsigned int get_hwc()
 {
-    {false, Config{}, {"dummy"}},
+	static unsigned int hwc = std::thread::hardware_concurrency();
+	return hwc ? hwc : 1;
+}
+
+const TestData test_cases[] =
+{
+	{false, Config{}, {"dummy"}},
     {false, Config{}, {"dummy", "-h"}},
-    {false, Config{}, {"dummy", "-p", "1024"}},
+
+	{false, Config{}, {"dummy", "-a", "0.0.0.0"}},
+	{false, Config{}, {"dummy", "-p", "1024"}},
     {false, Config{}, {"dummy", "-c", "10"}},
     {false, Config{}, {"dummy", "-t", "2"}},
-    {false, Config{}, {"dummy", "-p", "1024", "-t", "2"}},
+
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024"}},
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-c", "10"}},
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-t", "2"}},
+	{true,  Config{"127.0.0.1", 1024, 10, get_hwc()},
+					  {"dummy", "-p", "1024", "-c", "10"}},
+	{false, Config{}, {"dummy", "-p", "1024", "-t", "2"}},
     {false, Config{}, {"dummy", "-c", "10", "-t", "2"}},
-    {false, Config{}, {"dummy", "-p", "x", "-c", "10", "-t",  "2"}},
-    {false, Config{}, {"dummy", "-p", "1024", "-c", "x", "-t",  "2"}},
-    {false, Config{}, {"dummy", "-p", "1024", "-c", "10", "-t",  "x"}},
-    {false, Config{}, {"dummy", "-p", "0", "-c", "10", "-t",  "2"}},
-    {false, Config{}, {"dummy", "-p", "1023", "-c", "10", "-t",  "2"}},
-    {false, Config{}, {"dummy", "-p", "1024", "-c", "0", "-t",  "2"}},
-    {false, Config{}, {"dummy", "-p", "1024", "-c", "10", "-t",  "0"}},
-    {false, Config{}, {"dummy", "-p", "1024", "-c", "2", "-t",  "10"}},
-    {true,  Config{1024, 10, 2}, {"dummy", "-p", "1024", "-c", "10", "-t",  "2"}}
+
+	{true,  Config{"127.0.0.1", 1024, 10, 2},
+					  {"dummy", "-p", "1024", "-c", "10", "-t",  "2"}},
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-c", "10", "-t",  "2"}},
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-t",  "2"}},
+	{true,  Config{"127.0.0.1", 1024, 10, get_hwc()},
+					   {"dummy", "-a", "127.0.0.1", "-p", "1024", "-c", "10"}},
+	{false, Config{}, {"dummy", "-a", "x.0.0.0", "-p", "1024", "-c", "10", "-t", "2"}},
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "x", "-c", "10", "-t", "2"}},
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "x", "-t", "2"}},
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "10", "-t", "x"}},
+
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "0", "-c", "10", "-t",  "2"}},
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1023", "-c", "10", "-t",  "2"}},
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "0", "-t",  "2"}},
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "10", "-t",  "0"}},
+	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "2", "-t",  "10"}},
+
+	{true,  Config{"12.34.56.78", 1024, 10, 2},
+					   {"dummy", "-a", "12.34.56.78", "-p", "1024", "-c", "10", "-t",  "2"}}
 };
-}
 
 int main()
 {
-    for (const TestData& test_case : TestCases)
+	for (const TestData& test_case : test_cases)
     {
         if (!test_config(test_case))
         {
+			test_config(test_case);
+			std::cerr << "Test: " << test_case << "failed" << std::endl;
             return 1;
         }
     }
