@@ -4,7 +4,7 @@
 
 NetCalcCore::NetCalcCore(const Config& cfg_)
     : cfg(cfg_),
-      acceptor(service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), cfg.port)),
+      acceptor(service, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(cfg.address), cfg.port)),
       unit_test_mode(false)
 {
     //Init clients.
@@ -18,6 +18,7 @@ NetCalcCore::NetCalcCore(const Config& cfg_)
 
 NetCalcCore::~NetCalcCore()
 {
+    //Join threads.
     unsigned int thread_count = static_cast<unsigned int>(threads.size());
     for (unsigned int i = 0; i < thread_count; ++i)
     {
@@ -28,6 +29,7 @@ NetCalcCore::~NetCalcCore()
         }
     }
 
+    //Close all sockets.
     for (unsigned int i = 0; i < cfg.clients; ++i)
     {
         client& c = clients[i];
@@ -40,11 +42,14 @@ NetCalcCore::~NetCalcCore()
 
 void NetCalcCore::start(bool block /*= false*/)
 {
+    //Dispatch async operation for each client.
     for (unsigned int i = 0; i < cfg.clients; ++i)
     {
         dispatch_async_accept(i);
     }
 
+    //Start cfg.threads or cfg.threads - 1 threads.
+    //Each started thread will be 'event loop'.
     unsigned int threads_count = block ? cfg.threads - 1 : cfg.threads;
     threads.reserve(threads_count);
     for (unsigned int i = 0; i < threads_count; ++i)
@@ -52,6 +57,7 @@ void NetCalcCore::start(bool block /*= false*/)
         threads.push_back(std::thread([&self = *this](){ self.service.run();}));
     }
 
+    //Current thread will be 'event loop' if block is true.
     if (block)
     {
         service.run();
@@ -60,6 +66,7 @@ void NetCalcCore::start(bool block /*= false*/)
 
 void NetCalcCore::stop()
 {
+    //Stop all event loop.
     service.stop();
 }
 
@@ -76,6 +83,8 @@ void NetCalcCore::handle_accept(unsigned int client_index, const boost::system::
 #ifndef NDEBUG
     std::cout << "Client: " << client_index << " accepted" << std::endl;
 #endif
+
+    //Dispatch async receive for successful accept.
     dispatch_async_receive(client_index);
 }
 
@@ -91,11 +100,13 @@ void NetCalcCore::handle_receive(unsigned int client_index, const boost::system:
     std::cout << "Client: " << client_index << ", received: " << bytes_transferred << " bytes" << std::endl;
 #endif
 
+    //Parse received data and dispatch next async operation.
     parse_result(client_index, bytes_transferred);
 }
 
 void NetCalcCore::on_receive_error(unsigned int client_index, const boost::system::error_code& error)
 {
+    //Clear client object, close connection and dispatch async accept.
     client& c = clients[client_index];
     c.shunting_yard.clear();
     c.socket.close();
@@ -127,12 +138,14 @@ void NetCalcCore::handle_send(unsigned int client_index, bool processing_error, 
     }
     else
     {
+        //Dispatch async receive to receive next arithmetic expression.
         dispatch_async_receive(client_index);
     }
 }
 
 void NetCalcCore::on_send_error(unsigned int client_index, bool processing_error, const boost::system::error_code& error)
 {
+    //Clear client object, close connection and dispatch async accept.
     client& c = clients[client_index];
     c.shunting_yard.clear();
     c.socket.close();
@@ -159,10 +172,11 @@ void NetCalcCore::dispatch_async_accept(unsigned int client_index)
         self.handle_accept(client_index, error);
     };
 
+    client& c = clients[client_index];
     if (unit_test_mode)
-        clients[client_index].unit_test_mode = client_unit_test_mode::async_accept;
+        c.unit_test_mode = client_unit_test_mode::async_accept;
     else
-        acceptor.async_accept(clients[client_index].socket, l);
+        acceptor.async_accept(c.socket, l);
 }
 
 void NetCalcCore::dispatch_async_receive(unsigned int client_index)
@@ -195,6 +209,8 @@ void NetCalcCore::dispatch_async_send(unsigned int client_index, std::size_t byt
 
 void NetCalcCore::parse_result(unsigned int client_index, std::size_t bytes_transferred)
 {
+    //bytes_transferred == 0 means that long expression like: '1 + 2\n3 - 4\n5 * 6\n7 / 8\n' was received.
+    //It is need to calculate next result.
     std::string str;
     bool processing_error = false;
     client& c = clients[client_index];

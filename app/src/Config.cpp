@@ -15,6 +15,12 @@ using Clients = decltype(Config::clients);
 using Threads = decltype(Config::threads);
 namespace po = boost::program_options;
 
+/**
+ * This functions makes a boost::program_options::program_options object
+ * that contains descriptions of command line parameters;
+ * @param default_config[in] object for mapping with command line parameters;
+ * @return maked boost::program_options::options_description object.
+ */
 po::options_description make_description(Config& default_config)
 {
     po::options_description desc("General options");
@@ -75,18 +81,26 @@ bool check_ipv4_address(const char* address)
 
 boost::optional<Config> get_config(int argc, const char* const* argv)
 {
+    //Make default config.
 	auto hwc = std::thread::hardware_concurrency();
 	Config default_config{"127.0.0.1", 0, 0, hwc ? hwc : 1u};
+
+    //Make boost::program_options::program_options object that contains descriptions of command line parameters.
     po::options_description desc = make_description(default_config);
+
+    //Parse main function parameters and put them into variables_map.
     boost::optional<po::variables_map> vm = parse_arguments(argc, argv, desc);
     boost::optional<Config> empty_result;
 
+    //argc/argv don't contain arguments or arguments processing error or 'help' parameter provided.
     if (argc < 2 || !vm || vm.get().count("help"))
     {
+        //Print description of command line arguments.
         std::cout << desc << std::endl;
         return empty_result;
     }
 
+    //Check correctness of provided parameters and print error message for incorrect arguments.
 	bool incomplete = !check_param<Address>("address", default_config.address, false, vm.get(),
 		[](Address value) { return check_ipv4_address(value.c_str()); }, "Parameter 'address' is invalid");
 	incomplete = incomplete || !check_param<Port>("port", default_config.port, true, vm.get(),
@@ -106,5 +120,7 @@ boost::optional<Config> get_config(int argc, const char* const* argv)
             << ") can't exceed number of clients(" << default_config.clients << ")." << std::endl;
         return empty_result;
     }
+
+    //Correct arguments are provided, return inited config.
     return default_config;
 }
