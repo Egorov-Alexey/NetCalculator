@@ -1,33 +1,7 @@
-#include "ShuntingYard.h"
-
 #include <boost/lexical_cast.hpp>
 
-namespace
-{
-	//Auxiliary functions to fill ShuntingYard::base_operators.
-	ShuntingYard::Type plus  (ShuntingYard::Type a, ShuntingYard::Type b) { return a + b; }
-	ShuntingYard::Type minus (ShuntingYard::Type a, ShuntingYard::Type b) { return a - b; }
-	ShuntingYard::Type mult  (ShuntingYard::Type a, ShuntingYard::Type b) { return a * b; }
-	ShuntingYard::Type divide(ShuntingYard::Type a, ShuntingYard::Type b) { return a / b; }
-
-	//Return iterator to first not a digit or it_end.
-	std::string::const_iterator get_first_not_a_digit(std::string::const_iterator begin, std::string::const_iterator it_end)
-	{
-		std::string::const_iterator it = begin;
-		for (; it != it_end; ++it)
-		{
-			if (!isdigit(*it))
-			{
-				break;
-			}
-		}
-
-		return it;
-	}
-
-} //nameless namespace
-
-const std::function<ShuntingYard::LocalParseResult(ShuntingYard* self, std::string::const_iterator&, std::string::const_iterator)> ShuntingYard::steps[5] =
+template<class Type>
+const std::function<typename ShuntingYard<Type>::LocalParseResult(ShuntingYard<Type>* self, std::string::const_iterator&, std::string::const_iterator)> ShuntingYard<Type>::steps[5] =
 {
 	ShuntingYard::step_level_up_and_skip,
     ShuntingYard::step_get_number,
@@ -36,10 +10,14 @@ const std::function<ShuntingYard::LocalParseResult(ShuntingYard* self, std::stri
     ShuntingYard::step_process_operator
 };
 
-const ShuntingYard::BaseOperators ShuntingYard::base_operators[4] = { { 1, plus }, { 1, minus }, { 2, mult }, { 2, divide } };
-const unsigned int ShuntingYard::order = 2;
+template<class Type>
+const typename ShuntingYard<Type>::BaseOperators ShuntingYard<Type>::base_operators[4] = { { 1, plus }, { 1, minus }, { 2, mult }, { 2, divide } };
 
-ShuntingYard::Result ShuntingYard::parse(const char* s, size_t len)
+template<class Type>
+const unsigned int ShuntingYard<Type>::order = 2;
+
+template<class Type>
+typename ShuntingYard<Type>::Result ShuntingYard<Type>::parse(const char* s, size_t len)
 {
 	if (len == 1 && s[0] == '\n' && is_empty())
 	{	//Only '\n' in source data.
@@ -79,7 +57,8 @@ ShuntingYard::Result ShuntingYard::parse(const char* s, size_t len)
 	return std::make_pair(ParseResult::Success, value);
 };
 
-void ShuntingYard::clear()
+template<class Type>
+void ShuntingYard<Type>::clear()
 {
 	step = 0;
 	level = 0;
@@ -90,12 +69,14 @@ void ShuntingYard::clear()
 	remainder.clear();
 }
 
-bool ShuntingYard::is_empty() const
+template<class Type>
+bool ShuntingYard<Type>::is_empty() const
 {
 	return !step && !level && operands.empty() && operators.empty() && remainder.empty();
 }
 
-bool ShuntingYard::calculate()
+template<class Type>
+bool ShuntingYard<Type>::calculate()
 {
 	Type arg = operands.top();
 	operands.pop();
@@ -112,7 +93,8 @@ bool ShuntingYard::calculate()
 	return true;
 }
 
-ShuntingYard::LocalParseResult ShuntingYard::step_level_up_and_skip(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
+template<class Type>
+typename ShuntingYard<Type>::LocalParseResult ShuntingYard<Type>::step_level_up_and_skip(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
 {
 	while (it != it_end && (*it == '(' || is_skip_symbol(*it)))
 	{
@@ -132,7 +114,8 @@ ShuntingYard::LocalParseResult ShuntingYard::step_level_up_and_skip(ShuntingYard
 	return std::make_pair(ParseResult::Success, false);
 }
 
-ShuntingYard::LocalParseResult ShuntingYard::step_get_number(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
+template<class Type>
+typename ShuntingYard<Type>::LocalParseResult ShuntingYard<Type>::step_get_number(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
 {	//Assume that 'it' can not be equal to 'it_end' at the beginnig. Skip symbols are absent at the beginnig.
 	bool negative = (*it == '-');
 	if (negative)
@@ -170,7 +153,8 @@ ShuntingYard::LocalParseResult ShuntingYard::step_get_number(ShuntingYard* self,
 	return std::make_pair(ParseResult::Success, false);
 }
 
-ShuntingYard::LocalParseResult ShuntingYard::step_level_down_and_skip(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
+template<class Type>
+typename ShuntingYard<Type>::LocalParseResult ShuntingYard<Type>::step_level_down_and_skip(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
 {
 	while (it != it_end && (*it == ')' || is_skip_symbol(*it)))
 	{
@@ -195,7 +179,8 @@ ShuntingYard::LocalParseResult ShuntingYard::step_level_down_and_skip(ShuntingYa
 	return std::make_pair(ParseResult::Success, false);
 }
 
-ShuntingYard::LocalParseResult ShuntingYard::step_check_end_of_expression(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
+template<class Type>
+typename ShuntingYard<Type>::LocalParseResult ShuntingYard<Type>::step_check_end_of_expression(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
 {	//Assume that 'it' can not be equal to 'it_end' at the beginnig. Skip symbols are absent at the beginnig.
 	bool found = false;
 
@@ -226,7 +211,8 @@ ShuntingYard::LocalParseResult ShuntingYard::step_check_end_of_expression(Shunti
 	return std::make_pair(ParseResult::Success, found);
 }
 
-ShuntingYard::LocalParseResult ShuntingYard::step_process_operator(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
+template<class Type>
+typename ShuntingYard<Type>::LocalParseResult ShuntingYard<Type>::step_process_operator(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end)
 {
 	while (it != it_end && is_skip_symbol(*it)) { ++it; }
 
@@ -257,12 +243,30 @@ ShuntingYard::LocalParseResult ShuntingYard::step_process_operator(ShuntingYard*
 	return std::make_pair(ParseResult::Success, false);
 }
 
-bool ShuntingYard::is_skip_symbol(char op)
+template<class Type>
+std::string::const_iterator ShuntingYard<Type>::get_first_not_a_digit(std::string::const_iterator begin, std::string::const_iterator it_end)
+{
+    //Return iterator to first not a digit or it_end.
+    std::string::const_iterator it = begin;
+    for (; it != it_end; ++it)
+    {
+        if (!isdigit(*it))
+        {
+            break;
+        }
+    }
+
+    return it;
+}
+
+template<class Type>
+bool ShuntingYard<Type>::is_skip_symbol(char op)
 {
 	return op == ' ' || op == '\t' || op == '\r';
 }
 
-ShuntingYard::BaseOperatorsEnum ShuntingYard::get_base_operator(char op)
+template<class Type>
+typename ShuntingYard<Type>::BaseOperatorsEnum ShuntingYard<Type>::get_base_operator(char op)
 {
 	switch (op)
 	{
@@ -275,7 +279,8 @@ ShuntingYard::BaseOperatorsEnum ShuntingYard::get_base_operator(char op)
 	return BaseOperatorsEnum::Invalid;
 }
 
-std::pair<ShuntingYard::Type, bool> ShuntingYard::convert(const std::string& value)
+template<class Type>
+std::pair<Type, bool> ShuntingYard<Type>::convert(const std::string& value)
 {
 	std::pair<Type, bool> result{Type{}, true};
 

@@ -66,6 +66,7 @@ public:
     void stop();
 
 private:
+    using ShuntingYardInt = ShuntingYard<int>;
 
     /**
      * @brief This enum is used in unit-test mode to represent last async operation.
@@ -88,7 +89,7 @@ private:
         //Buffer for sending/receiving data.
         char buffer[8192];
         //Object to compute a receiving expression.
-        ShuntingYard shunting_yard;
+        ShuntingYardInt shunting_yard;
         //Last async operation in unit-test mode.
         client_unit_test_mode unit_test_mode;
     };

@@ -39,7 +39,7 @@ static const std::string div_by_zero = "Division by zero\n";
 static const std::string invalid_expr = "Invalid expression\n";
 
 NetCalcCoreTest::NetCalcCoreTest()
-    : cfg{0, 1, 0}, core(cfg)
+    : cfg{"127.0.0.1", 0, 1, 0}, core(cfg)
 {
     core.unit_test_mode = true;
     core.start();

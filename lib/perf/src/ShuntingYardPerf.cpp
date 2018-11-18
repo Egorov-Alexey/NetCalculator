@@ -4,6 +4,8 @@
 #include <chrono>
 #include <fstream>
 
+using ShuntingYardInt = ShuntingYard<int>;
+
 bool shunting_yard_perf(const char* filename)
 {
     std::ifstream f(filename);
@@ -13,11 +15,11 @@ bool shunting_yard_perf(const char* filename)
         return false;
     }
 
-    ShuntingYard shunting_yard;
-    ShuntingYard::Result rc{ ShuntingYard::ParseResult::Incomplete, 0 };
+    ShuntingYardInt shunting_yard;
+    ShuntingYardInt::Result rc{ ShuntingYardInt::ParseResult::Incomplete, 0 };
     std::chrono::time_point<std::chrono::system_clock> start_point{ std::chrono::system_clock::now() };
 
-    while (rc.first == ShuntingYard::ParseResult::Incomplete)
+    while (rc.first == ShuntingYardInt::ParseResult::Incomplete)
     {
         char buffer[8192];
         f.read(buffer, sizeof(buffer));
@@ -36,7 +38,7 @@ bool shunting_yard_perf(const char* filename)
         }
     }
 
-    if (rc.first == ShuntingYard::ParseResult::Success)
+    if (rc.first == ShuntingYardInt::ParseResult::Success)
     {
 		std::chrono::time_point<std::chrono::system_clock> end_point{ std::chrono::system_clock::now() };
         auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end_point - start_point);
@@ -47,7 +49,7 @@ bool shunting_yard_perf(const char* filename)
         std::cerr << "Could not compute an expression. " << std::endl;
     }
 
-    return rc.first == ShuntingYard::ParseResult::Success;
+    return rc.first == ShuntingYardInt::ParseResult::Success;
 }
 
 int main(int argc, const char *argv[])

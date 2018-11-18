@@ -16,8 +16,8 @@ include_directories (${APP_INCLUDE_PATH})
 
 #set test sources
 set(TEST1_SOURCE_FILES "${TEST_SRC_PATH}/NetCalculatorAppTest.cpp")
-set(TEST2_SOURCE_FILES "${APP_SRC_PATH}/NetCalcCore.cpp" "${TEST_SRC_PATH}/NetCalcCoreTest.cpp")
-set(TEST3_SOURCE_FILES "${APP_SRC_PATH}/Config.cpp" "${TEST_SRC_PATH}/ConfigTest.cpp")
+set(TEST2_SOURCE_FILES "${TEST_SRC_PATH}/NetCalcCoreTest.cpp")
+set(TEST3_SOURCE_FILES "${TEST_SRC_PATH}/ConfigTest.cpp")
 
 #set target executable
 add_executable (${TEST1_APP_NAME} ${TEST1_SOURCE_FILES})
@@ -26,8 +26,8 @@ add_executable (${TEST3_APP_NAME} ${TEST3_SOURCE_FILES})
 
 #add the library
 target_link_libraries (${TEST1_APP_NAME} ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (${TEST2_APP_NAME} ${LIB_NAME} Threads::Threads ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (${TEST3_APP_NAME} ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries (${TEST2_APP_NAME} ${NETCORE_LIB_NAME} Threads::Threads ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (${TEST3_APP_NAME} ${CONFIG_LIB_NAME} ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 # Turn on CMake testing capabilities
 enable_testing ()

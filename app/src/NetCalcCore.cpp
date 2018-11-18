@@ -214,20 +214,20 @@ void NetCalcCore::parse_result(unsigned int client_index, std::size_t bytes_tran
     std::string str;
     bool processing_error = false;
     client& c = clients[client_index];
-    ShuntingYard::Result parse_result = c.shunting_yard.parse(bytes_transferred ? c.buffer : nullptr, bytes_transferred);
+    ShuntingYardInt::Result parse_result = c.shunting_yard.parse(bytes_transferred ? c.buffer : nullptr, bytes_transferred);
 
     switch (parse_result.first)
     {
-        case ShuntingYard::ParseResult::Success:
+        case ShuntingYardInt::ParseResult::Success:
             str = std::to_string(parse_result.second) + "\n";
             break;
-        case ShuntingYard::ParseResult::Incomplete:
+        case ShuntingYardInt::ParseResult::Incomplete:
             break;
-        case ShuntingYard::ParseResult::DivisionByZero:
+        case ShuntingYardInt::ParseResult::DivisionByZero:
             str = "Division by zero\n";
             processing_error = true;
             break;
-        case ShuntingYard::ParseResult::InvalidExpression:
+        case ShuntingYardInt::ParseResult::InvalidExpression:
             str = "Invalid expression\n";
             processing_error = true;
             break;

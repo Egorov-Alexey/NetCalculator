@@ -4,85 +4,87 @@
 #include <iostream>
 #include <functional>
 
+using ShuntingYardInt = ShuntingYard<int>;
+
 struct ShuntingYardTestCase
 {
 	std::string expr;
 	int result;
-	ShuntingYard::ParseResult parse_result;
+    ShuntingYardInt::ParseResult parse_result;
 };
 
 const ShuntingYardTestCase shunting_yard_test_array[] =
 {
-	{ "",					0,		ShuntingYard::ParseResult::Incomplete},
-	{ "-",					0,		ShuntingYard::ParseResult::Incomplete},
-	{ "1",					0,		ShuntingYard::ParseResult::Incomplete},
-	{ "1 + 2",				0,		ShuntingYard::ParseResult::Incomplete},
-	{ "\n",					0,		ShuntingYard::ParseResult::Success },
-    { "123\n",              123,	ShuntingYard::ParseResult::Success },
-    { "-123\n",             -123,	ShuntingYard::ParseResult::Success },
-    { "(123)\n",            123,	ShuntingYard::ParseResult::Success },
-    { "(-123)\n",           -123,	ShuntingYard::ParseResult::Success },
-    { "123 + 456\n",		579,	ShuntingYard::ParseResult::Success },
-	{ "-123 + -456\n",		-579,	ShuntingYard::ParseResult::Success },
-	{ "(-123) + (-456)\n",	-579,	ShuntingYard::ParseResult::Success },
-	{ "123 + 456*789\n",	359907,	ShuntingYard::ParseResult::Success },
-	{ "(123 + 456)*789\n",	456831,	ShuntingYard::ParseResult::Success },
-	{ "123 - 456*789\n",	-359661,ShuntingYard::ParseResult::Success },
-	{ "(123 - 456)*789\n",	-262737,ShuntingYard::ParseResult::Success },
-	{ "456 + 789/123\n",	462,	ShuntingYard::ParseResult::Success },
-	{ "(12 * 34) / 56\n",	7,		ShuntingYard::ParseResult::Success },
-	{ "12 * 34 / 56\n",		7,		ShuntingYard::ParseResult::Success },
-	{ "12 * (56 / 5)\n",	132,	ShuntingYard::ParseResult::Success },
-	{ "((12+34)*56)/78-90\n",-57,	ShuntingYard::ParseResult::Success },
-	{ "1399/43/5\n",		6,		ShuntingYard::ParseResult::Success },
-	{ "(1399/43)/5\n",		6,		ShuntingYard::ParseResult::Success },
-	{ "1399/(43/5)\n",		174,	ShuntingYard::ParseResult::Success },
-	{ "+\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "/\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "*\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "(123 + 456\n",		0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "/123\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "123/\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "*123\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "123*\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "123-\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "+123\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "123+\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "(123\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "123(\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ ")123\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "123)\n",				0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "123 + 456)\n",		0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "(123 + 456))\n",		0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ ")123 + 456\n",		0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "123( + 456)\n",		0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "123 + () + 456)\n",	0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "123 +/ 456\n",		0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "1 + 2147483648\n",	0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "1 + -2147483649\n",	0,		ShuntingYard::ParseResult::InvalidExpression },
-	{ "1/0\n",				0,		ShuntingYard::ParseResult::DivisionByZero },
-	{ "5/(2/3)\n",			0,		ShuntingYard::ParseResult::DivisionByZero }
+    { "",					0,		ShuntingYardInt::ParseResult::Incomplete},
+    { "-",					0,		ShuntingYardInt::ParseResult::Incomplete},
+    { "1",					0,		ShuntingYardInt::ParseResult::Incomplete},
+    { "1 + 2",				0,		ShuntingYardInt::ParseResult::Incomplete},
+    { "\n",					0,		ShuntingYardInt::ParseResult::Success },
+    { "123\n",              123,	ShuntingYardInt::ParseResult::Success },
+    { "-123\n",             -123,	ShuntingYardInt::ParseResult::Success },
+    { "(123)\n",            123,	ShuntingYardInt::ParseResult::Success },
+    { "(-123)\n",           -123,	ShuntingYardInt::ParseResult::Success },
+    { "123 + 456\n",		579,	ShuntingYardInt::ParseResult::Success },
+    { "-123 + -456\n",		-579,	ShuntingYardInt::ParseResult::Success },
+    { "(-123) + (-456)\n",	-579,	ShuntingYardInt::ParseResult::Success },
+    { "123 + 456*789\n",	359907,	ShuntingYardInt::ParseResult::Success },
+    { "(123 + 456)*789\n",	456831,	ShuntingYardInt::ParseResult::Success },
+    { "123 - 456*789\n",	-359661,ShuntingYardInt::ParseResult::Success },
+    { "(123 - 456)*789\n",	-262737,ShuntingYardInt::ParseResult::Success },
+    { "456 + 789/123\n",	462,	ShuntingYardInt::ParseResult::Success },
+    { "(12 * 34) / 56\n",	7,		ShuntingYardInt::ParseResult::Success },
+    { "12 * 34 / 56\n",		7,		ShuntingYardInt::ParseResult::Success },
+    { "12 * (56 / 5)\n",	132,	ShuntingYardInt::ParseResult::Success },
+    { "((12+34)*56)/78-90\n",-57,	ShuntingYardInt::ParseResult::Success },
+    { "1399/43/5\n",		6,		ShuntingYardInt::ParseResult::Success },
+    { "(1399/43)/5\n",		6,		ShuntingYardInt::ParseResult::Success },
+    { "1399/(43/5)\n",		174,	ShuntingYardInt::ParseResult::Success },
+    { "+\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "/\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "*\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "(123 + 456\n",		0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "/123\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "123/\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "*123\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "123*\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "123-\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "+123\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "123+\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "(123\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "123(\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { ")123\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "123)\n",				0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "123 + 456)\n",		0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "(123 + 456))\n",		0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { ")123 + 456\n",		0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "123( + 456)\n",		0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "123 + () + 456)\n",	0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "123 +/ 456\n",		0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "1 + 2147483648\n",	0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "1 + -2147483649\n",	0,		ShuntingYardInt::ParseResult::InvalidExpression },
+    { "1/0\n",				0,		ShuntingYardInt::ParseResult::DivisionByZero },
+    { "5/(2/3)\n",			0,		ShuntingYardInt::ParseResult::DivisionByZero }
 };
 
 bool shunting_yard_test1()
 {
 	bool result = true;
-	ShuntingYard shunting_yard;
+    ShuntingYard<int> shunting_yard;
 
 	for (auto& test : shunting_yard_test_array)
 	{
-		ShuntingYard::Result parse_result = shunting_yard.parse(test.expr.data(), test.expr.length());
+        ShuntingYardInt::Result parse_result = shunting_yard.parse(test.expr.data(), test.expr.length());
 		if (parse_result.first != test.parse_result)
 		{
 			std::cerr << "Test1 for expression '" << test.expr << "' failed." << std::endl;
 			result = false;
 		}
-		else if (parse_result.first == ShuntingYard::ParseResult::Success && parse_result.second != test.result)
+        else if (parse_result.first == ShuntingYardInt::ParseResult::Success && parse_result.second != test.result)
 		{
 			std::cerr << "Test1 for expression '" << test.expr << "' failed." << std::endl;
 			result = false;
 		}
-		if (test.parse_result == ShuntingYard::ParseResult::Incomplete)
+        if (test.parse_result == ShuntingYardInt::ParseResult::Incomplete)
 		{
 			shunting_yard.clear();
 		}
@@ -98,7 +100,7 @@ bool shunting_yard_test1()
 
 bool shunting_yard_test2_aux(const char* s, size_t length, int expected_result)
 {
-	ShuntingYard yard;
+    ShuntingYard<int> shunting_yard;
 	int result = 0;
 
 	for (size_t step = 1; step <= length; ++step)
@@ -106,17 +108,17 @@ bool shunting_yard_test2_aux(const char* s, size_t length, int expected_result)
 		size_t start = 0;
 		while (start < length)
 		{
-			ShuntingYard::Result r = yard.parse(&s[start], start + step - 1 < length ? step : length - start);
+            ShuntingYardInt::Result r = shunting_yard.parse(&s[start], start + step - 1 < length ? step : length - start);
 			if (start + step < length)
 			{
-				if (r.first != ShuntingYard::ParseResult::Incomplete)
+                if (r.first != ShuntingYardInt::ParseResult::Incomplete)
 				{
 					return false;
 				}
 			}
 			else
 			{
-				if (r.first != ShuntingYard::ParseResult::Success && r.second != expected_result)
+                if (r.first != ShuntingYardInt::ParseResult::Success && r.second != expected_result)
 				{
 					return false;
 				}
@@ -158,23 +160,23 @@ bool shunting_yard_test3()
 {
     std::string s = "(2 + 3) * 7 / 11\n(109 - 53) * 17 / 19\n103/((67 - 43) / 7)\n";
 
-    ShuntingYard shunting_yard;
-    ShuntingYard::Result result{shunting_yard.parse(s.data(), s.length())};
-    if (result.first != ShuntingYard::ParseResult::Success || result.second != 3 || shunting_yard.is_empty())
+    ShuntingYard<int> shunting_yard;
+    ShuntingYardInt::Result result{shunting_yard.parse(s.data(), s.length())};
+    if (result.first != ShuntingYardInt::ParseResult::Success || result.second != 3 || shunting_yard.is_empty())
     {
         std::cerr << "Test3 for first call failed" << std::endl;
         return false;
     }
 
     result = shunting_yard.parse(nullptr, 0);
-    if (result.first != ShuntingYard::ParseResult::Success || result.second != 50 || shunting_yard.is_empty())
+    if (result.first != ShuntingYardInt::ParseResult::Success || result.second != 50 || shunting_yard.is_empty())
     {
         std::cerr << "Test3 for second call failed" << std::endl;
         return false;
     }
 
     result = shunting_yard.parse(nullptr, 0);
-    if (result.first != ShuntingYard::ParseResult::Success || result.second != 34 || !shunting_yard.is_empty())
+    if (result.first != ShuntingYardInt::ParseResult::Success || result.second != 34 || !shunting_yard.is_empty())
     {
         std::cerr << "Test3 for third call failed" << std::endl;
         return false;

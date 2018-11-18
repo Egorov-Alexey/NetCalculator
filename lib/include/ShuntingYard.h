@@ -5,11 +5,10 @@
 #include <string>
 #include <functional>
 
+template <class Type>
 class ShuntingYard
 {
 public:
-	using Type = int;
-
 	enum class ParseResult
 	{
 		Success,
@@ -72,14 +71,21 @@ private:
 	/** Calculate partial result using members operands and operators. */
 	bool calculate();
 
-	/** Methods of state machine*/
+    /** Methods of state machine */
 	static LocalParseResult step_level_up_and_skip(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end);
     static LocalParseResult step_get_number(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end);
 	static LocalParseResult step_level_down_and_skip(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end);
     static LocalParseResult step_check_end_of_expression(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end);
     static LocalParseResult step_process_operator(ShuntingYard* self, std::string::const_iterator& it, std::string::const_iterator it_end);
 
-	static bool is_skip_symbol(char op);
+    /**Auxiliary functions to fill ShuntingYard::base_operators. */
+    static Type plus  (Type a, Type b) { return a + b; }
+    static Type minus (Type a, Type b) { return a - b; }
+    static Type mult  (Type a, Type b) { return a * b; }
+    static Type divide(Type a, Type b) { return a / b; }
+
+    static std::string::const_iterator get_first_not_a_digit(std::string::const_iterator begin, std::string::const_iterator it_end);
+    static bool is_skip_symbol(char op);
 	static BaseOperatorsEnum get_base_operator(char op);
 	static std::pair<Type, bool> convert(const std::string& value);
 
@@ -103,3 +109,5 @@ private:
 	/** First part of incomplete number. */
 	std::string remainder;
 };
+
+#include "ShuntingYard.tpp"

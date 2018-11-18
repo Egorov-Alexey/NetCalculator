@@ -19,4 +19,4 @@ file (GLOB PERF_SOURCE_FILES "${PERF_SRC_PATH}/*.cpp")
 add_executable (${PERF_APP_NAME} ${PERF_SOURCE_FILES})
 
 #add the library
-target_link_libraries (${PERF_APP_NAME} ${LIB_NAME})
+target_link_libraries (${PERF_APP_NAME})
