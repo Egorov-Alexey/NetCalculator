@@ -1,16 +1,25 @@
 # Net calculator
-NetCalculator is used for calculation of long arithmetic expressions.
-NetCalculator is a server multithreaded application.
-NetCalculator supports some simultaneous connections.
+NetCalculator is an application used to long arithmetic expressions evaluation.
+NetCalculator is a server multithreaded application that keeps several simultaneous connections.
 
 NetCalculator:
- - accepts a connection;
- - receives an arithmetic expression;
- - checks a correctness of an expression and calculates a result during data receiving;
- - sends a result to a client when receives '\n';
+ - accepts TCP-connections;
+ - receives an arithmetic expression, calculates result and sends it back;
+ - uses 2-stack modification of Shunting-yard Dijkstra's algorithm;
+ - can receive unified expression during several receive operations;
+ - considers '\n' as end of expression;
+ - can receive and process several expressions during one receive operation;
+ - doesn't close connection after sending correct result;
+ - sends string "Division by zero" if division by zero happens and closes a connection;
+ - sends string "Invalid expression" if invalid expression was received and closes a connection;
+ - adds '\n' to each response; 
+ - can process several simultaneous connections (depend on input parameter '-c');
+ - can start several threads (depend on input parameter '-t');
+ - implements event-driven approach;
+ - uses boost::asio.
 
-## Info
-It uses basic [C++14](https://isocpp.org/wiki/faq/cpp14-language) syntax, but nothing really complicated.
+## Main highlights
+It uses basic [C++14](https://isocpp.org/wiki/faq/cpp14-language) syntax.
 It uses [boost](https://www.boost.org/) library. Version 1.65.1 is used.
 [CMake](https://cmake.org/) is the chosen build system using [ctest](https://cmake.org/Wiki/CMake/Testing_With_CTest).
 Also bash is used for a unit-test.
