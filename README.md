@@ -1,10 +1,15 @@
 # Net calculator
-NetCalculator is an application used to long arithmetic expressions evaluation.
+NetCalculator is an application used to long arithmetic infix expressions evaluation.
 NetCalculator is a server multithreaded application that keeps several simultaneous connections.
 
 NetCalculator:
  - accepts TCP-connections;
- - receives an arithmetic expression, calculates result and sends it back;
+ - receives an infix arithmetic expression, evaluates a result and sends it back;
+ - evaluates an expression on the run;
+ - uses integer arithmetic (5/2 -> 2, 2/3 -> 0);
+ - supports operations: +, -, *, /;
+ - supports '(' and ')';
+ - skips symbols '\t', '\r' , ' ' in a received expression;
  - uses 2-stack modification of Shunting-yard Dijkstra's algorithm;
  - can receive unified expression during several receive operations;
  - considers '\n' as end of expression;

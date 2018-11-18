@@ -49,41 +49,41 @@ unsigned int get_hwc()
 
 const TestData test_cases[] =
 {
-	{false, Config{}, {"dummy"}},
+    {false, Config{}, {"dummy"}},
     {false, Config{}, {"dummy", "-h"}},
 
-	{false, Config{}, {"dummy", "-a", "0.0.0.0"}},
-	{false, Config{}, {"dummy", "-p", "1024"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0"}},
+    {false, Config{}, {"dummy", "-p", "1024"}},
     {false, Config{}, {"dummy", "-c", "10"}},
     {false, Config{}, {"dummy", "-t", "2"}},
 
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024"}},
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-c", "10"}},
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-t", "2"}},
-	{true,  Config{"127.0.0.1", 1024, 10, get_hwc()},
-					  {"dummy", "-p", "1024", "-c", "10"}},
-	{false, Config{}, {"dummy", "-p", "1024", "-t", "2"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-c", "10"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-t", "2"}},
+    {true,  Config{"127.0.0.1", 1024, 10, get_hwc()},
+        {"dummy", "-p", "1024", "-c", "10"}},
+    {false, Config{}, {"dummy", "-p", "1024", "-t", "2"}},
     {false, Config{}, {"dummy", "-c", "10", "-t", "2"}},
 
-	{true,  Config{"127.0.0.1", 1024, 10, 2},
-					  {"dummy", "-p", "1024", "-c", "10", "-t",  "2"}},
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-c", "10", "-t",  "2"}},
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-t",  "2"}},
-	{true,  Config{"127.0.0.1", 1024, 10, get_hwc()},
-					   {"dummy", "-a", "127.0.0.1", "-p", "1024", "-c", "10"}},
-	{false, Config{}, {"dummy", "-a", "x.0.0.0", "-p", "1024", "-c", "10", "-t", "2"}},
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "x", "-c", "10", "-t", "2"}},
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "x", "-t", "2"}},
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "10", "-t", "x"}},
+    {true,  Config{"127.0.0.1", 1024, 10, 2},
+        {"dummy", "-p", "1024", "-c", "10", "-t",  "2"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-c", "10", "-t",  "2"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-t",  "2"}},
+    {true,  Config{"127.0.0.1", 1024, 10, get_hwc()},
+        {"dummy", "-a", "127.0.0.1", "-p", "1024", "-c", "10"}},
+    {false, Config{}, {"dummy", "-a", "x.0.0.0", "-p", "1024", "-c", "10", "-t", "2"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "x", "-c", "10", "-t", "2"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "x", "-t", "2"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "10", "-t", "x"}},
 
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "0", "-c", "10", "-t",  "2"}},
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1023", "-c", "10", "-t",  "2"}},
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "0", "-t",  "2"}},
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "10", "-t",  "0"}},
-	{false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "2", "-t",  "10"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "0", "-c", "10", "-t",  "2"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1023", "-c", "10", "-t",  "2"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "0", "-t",  "2"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "10", "-t",  "0"}},
+    {false, Config{}, {"dummy", "-a", "0.0.0.0", "-p", "1024", "-c", "2", "-t",  "10"}},
 
-	{true,  Config{"12.34.56.78", 1024, 10, 2},
-					   {"dummy", "-a", "12.34.56.78", "-p", "1024", "-c", "10", "-t",  "2"}}
+    {true,  Config{"12.34.56.78", 1024, 10, 2},
+        {"dummy", "-a", "12.34.56.78", "-p", "1024", "-c", "10", "-t",  "2"}}
 };
 
 int main()
@@ -92,8 +92,8 @@ int main()
     {
         if (!test_config(test_case))
         {
-			test_config(test_case);
-			std::cerr << "Test: " << test_case << "failed" << std::endl;
+            test_config(test_case);
+            std::cerr << "Test: " << test_case << "failed" << std::endl;
             return 1;
         }
     }

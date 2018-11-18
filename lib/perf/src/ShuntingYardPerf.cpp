@@ -40,7 +40,7 @@ bool shunting_yard_perf(const char* filename)
 
     if (rc.first == ShuntingYardInt::ParseResult::Success)
     {
-		std::chrono::time_point<std::chrono::system_clock> end_point{ std::chrono::system_clock::now() };
+        std::chrono::time_point<std::chrono::system_clock> end_point{ std::chrono::system_clock::now() };
         auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end_point - start_point);
         std::cout << "Result of expression is: " << rc.second << ", spend time: " << milliseconds.count() << " milliseconds.";
     }

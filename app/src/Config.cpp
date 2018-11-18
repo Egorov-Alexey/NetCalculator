@@ -101,13 +101,13 @@ boost::optional<Config> get_config(int argc, const char* const* argv)
     }
 
     //Check correctness of provided parameters and print error message for incorrect arguments.
-	bool incomplete = !check_param<Address>("address", default_config.address, false, vm.get(),
-		[](Address value) { return check_ipv4_address(value.c_str()); }, "Parameter 'address' is invalid");
-	incomplete = incomplete || !check_param<Port>("port", default_config.port, true, vm.get(),
+    bool incomplete = !check_param<Address>("address", default_config.address, false, vm.get(),
+        [](Address value) { return check_ipv4_address(value.c_str()); }, "Parameter 'address' is invalid");
+    incomplete = incomplete || !check_param<Port>("port", default_config.port, true, vm.get(),
         [](Port value) { return value >= 1024; }, "Parameter 'port' must be >= 1024.");
-	incomplete = incomplete || !check_param<Clients>("clients", default_config.clients, true, vm.get(),
+    incomplete = incomplete || !check_param<Clients>("clients", default_config.clients, true, vm.get(),
         [](Clients value) { return value > 0; }, "Parameter 'clients' must be positive.");
-	incomplete = incomplete || !check_param<Threads>("threads", default_config.threads, false, vm.get(),
+    incomplete = incomplete || !check_param<Threads>("threads", default_config.threads, false, vm.get(),
         [](Threads value) { return value > 0; }, "Parameter 'threads' must be positive.");
 
     if (incomplete)

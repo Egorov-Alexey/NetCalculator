@@ -5,7 +5,7 @@
 
 struct Config
 {
-    // Listen address.
+    //Listen address.
     std::string address;
 
     //Listen port.
