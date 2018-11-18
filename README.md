@@ -73,14 +73,13 @@ From the Build folder
 Just run with --help parameter and learn program options:
 ```shell
 ./NetCalculatorApp --help
-Parameter 'port' is not defined.
-Parameter 'clients' is not defined.
 General options:
   -h [ --help ]         Show help
+  -a [ --address ] arg  Listen address (default value is 127.0.0.1)
   -p [ --port ] arg     Listen port
   -c [ --clients ] arg  Maximum number of simultaneous clients
   -t [ --threads ] arg  Number of threads (default value is
-                        std::thread::hardware_concurrency())
+                        hardware_concurrency() (1 if not computable))
 ```
 
 Choose any free non-system port, number of simultaneous connections you want to proceed and how many threads will process these connections:

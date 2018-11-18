@@ -1,3 +1,15 @@
+/**
+ * This file contains unit-tests for ShuntingYard library.
+ * main function returns 0 if all test passed.
+ * main function returns 1 if one of test failed.
+ *
+ * There are following types of tests:
+ * - test of internal functions of ShuntingYard class;
+ * - test with several simple cases;
+ * - test that calls parse() method several times for one expression;
+ * - test that calls parse() method one time for several expressions expression;
+ */
+
 #include "ShuntingYard.h"
 
 #include <iostream>
@@ -101,8 +113,8 @@ bool ShuntingYardTest::test_convert()
 
 struct ShuntingYardTest1Case
 {
-	std::string expr;
-	int result;
+    std::string expr;
+    int result;
     ShuntingYardInt::ParseResult parse_result;
 };
 
@@ -162,34 +174,34 @@ const ShuntingYardTest1Case shunting_yard_test1_array[] =
 
 bool shunting_yard_test1()
 {
-	bool result = true;
+    bool result = true;
     ShuntingYard<int> shunting_yard;
 
     for (auto& test : shunting_yard_test1_array)
-	{
+    {
         ShuntingYardInt::Result parse_result = shunting_yard.parse(test.expr.data(), test.expr.length());
-		if (parse_result.first != test.parse_result)
-		{
+        if (parse_result.first != test.parse_result)
+        {
             std::cerr << "ShuntingYardTest1 for expression '" << test.expr << "' failed." << std::endl;
-			result = false;
-		}
+            result = false;
+        }
         else if (parse_result.first == ShuntingYardInt::ParseResult::Success && parse_result.second != test.result)
-		{
+        {
             std::cerr << "ShuntingYardTest1 for expression '" << test.expr << "' failed." << std::endl;
-			result = false;
-		}
+            result = false;
+        }
         if (test.parse_result == ShuntingYardInt::ParseResult::Incomplete)
-		{
-			shunting_yard.clear();
-		}
-	}
+        {
+            shunting_yard.clear();
+        }
+    }
 
-	if (result)
-	{
+    if (result)
+    {
         std::cout << "ShuntingYardTest1 passed" << std::endl;
-	}
+    }
 
-	return result;
+    return result;
 }
 
 bool shunting_yard_test2_aux(const char* s, size_t length, int expected_result)
@@ -229,26 +241,26 @@ bool shunting_yard_test2_aux(const char* s, size_t length, int expected_result)
 
 bool shunting_yard_test2()
 {
-	std::string s1 = "53/(17-(19+23))*11-(31+(37+83))+113\n";
-	bool result1 = shunting_yard_test2_aux(s1.data(), s1.length(), -60);
-	if (!result1)
-	{
+    std::string s1 = "53/(17-(19+23))*11-(31+(37+83))+113\n";
+    bool result1 = shunting_yard_test2_aux(s1.data(), s1.length(), -60);
+    if (!result1)
+    {
         std::cerr << "ShuntingYardTest2 for expression '" << s1 << "' failed." << std::endl;
-	}
+    }
 
-	std::string s2 = "53 	 / (  17 -  (  19 + 23 ) ) * 11  -	 (31 +  (  37   +  83 ) )  + 113  \n";
-	bool result2 = shunting_yard_test2_aux(s2.data(), s2.length(), -60);
-	if (!result2)
-	{
+    std::string s2 = "53 	 / (  17 -  (  19 + 23 ) ) * 11  -	 (31 +  (  37   +  83 ) )  + 113  \n";
+    bool result2 = shunting_yard_test2_aux(s2.data(), s2.length(), -60);
+    if (!result2)
+    {
         std::cerr << "ShuntingYardTest2 for expression '" << s1 << "' failed." << std::endl;
-	}
+    }
 
-	if (result1 && result2)
-	{
+    if (result1 && result2)
+    {
         std::cout << "ShuntingYardTest2 passed" << std::endl;
-	}
+    }
 
-	return result1 && result2;
+    return result1 && result2;
 }
 
 bool shunting_yard_test3()

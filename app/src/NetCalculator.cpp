@@ -32,12 +32,12 @@ int main(int argc, const char *argv[])
         boost::asio::signal_set sig(service, SIGINT, SIGTERM);
         sig.async_wait([&netCalcCore](const boost::system::error_code&, int){ netCalcCore.stop(); });
         service.run();
-   }
-   catch (const boost::system::system_error& e)
-   {
+    }
+    catch (const boost::system::system_error& e)
+    {
         std::cerr << "Incought exception: " << e.what() << std::endl;
         return 2;
-   }
+    }
 
-	return 0;
+    return 0;
 }

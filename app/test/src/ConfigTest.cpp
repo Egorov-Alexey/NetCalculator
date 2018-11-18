@@ -1,3 +1,9 @@
+/**
+ * This file contains unit-tests for get_config() function.
+ * main function returns 0 if all test passed.
+ * main function returns 1 if one of test failed.
+ */
+
 #include <Config.h>
 
 #include <iostream>
@@ -6,10 +12,10 @@
 
 bool operator==(const Config& lhs, const Config& rhs)
 {
-	return lhs.address == rhs.address &&
-		lhs.port == rhs.port &&
-		lhs.clients == rhs.clients &&
-		lhs.threads == rhs.threads;
+    return lhs.address == rhs.address &&
+        lhs.port == rhs.port &&
+        lhs.clients == rhs.clients &&
+        lhs.threads == rhs.threads;
 }
 
 struct TestData
@@ -21,12 +27,12 @@ struct TestData
 
 std::ostream& operator<<(std::ostream& s, const TestData& test_case)
 {
-	for (auto& arg: test_case.args)
-	{
-		s << arg << " ";
-	}
+    for (auto& arg: test_case.args)
+    {
+        s << arg << " ";
+    }
 
-	return s;
+    return s;
 }
 
 bool test_config(const TestData& test_data)
@@ -43,8 +49,8 @@ bool test_config(const TestData& test_data)
 
 unsigned int get_hwc()
 {
-	static unsigned int hwc = std::thread::hardware_concurrency();
-	return hwc ? hwc : 1;
+    static unsigned int hwc = std::thread::hardware_concurrency();
+    return hwc ? hwc : 1;
 }
 
 const TestData test_cases[] =
@@ -88,7 +94,7 @@ const TestData test_cases[] =
 
 int main()
 {
-	for (const TestData& test_case : test_cases)
+    for (const TestData& test_case : test_cases)
     {
         if (!test_config(test_case))
         {

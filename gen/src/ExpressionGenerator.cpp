@@ -1,30 +1,34 @@
+/**
+ * This file contains program that generates long arithmetical infix expressions.
+ */
+
 #include <iostream>
 #include <limits>
 #include <random>
 
 inline unsigned int number_of_digits(int value)
 {
-	unsigned int n = value < 0 ? 1 : 0;
+    unsigned int n = value < 0 ? 1 : 0;
 
-	do
-	{
-		++n;
-		value /= 10;
-	} while (value);
+    do
+    {
+        ++n;
+        value /= 10;
+    } while (value);
 
-	return n;
+    return n;
 }
 
 char get_operator(int index)
 {
-	switch (index)
-	{
-		case 0: return '+';
-		case 1: return '-';
-		case 2: return '*';
-		case 3: return '/';
-	}
-	return ' ';
+    switch (index)
+    {
+        case 0: return '+';
+        case 1: return '-';
+        case 2: return '*';
+        case 3: return '/';
+    }
+    return ' ';
 }
 
 void generate_random_expr(std::ostream& stream, unsigned int length)
@@ -36,38 +40,38 @@ void generate_random_expr(std::ostream& stream, unsigned int length)
     std::uniform_int_distribution<> operation_distr(0, 2);
     unsigned int i = 0;
 
-	while (i < length)
-	{
-		//1. Which entity will be generated open bracket or number?
-		while (!distr_0_1(random_engine))
-		{
-			++open_brackets;
-			++i;
-			stream << "(";
-		}
+    while (i < length)
+    {
+        //1. Which entity will be generated open bracket or number?
+        while (!distr_0_1(random_engine))
+        {
+            ++open_brackets;
+            ++i;
+            stream << "(";
+        }
 
-		//2. Generate number
-		int rnd = number_distr(random_engine);
-		i += number_of_digits(rnd);
-		stream << rnd;
+        //2. Generate number
+        int rnd = number_distr(random_engine);
+        i += number_of_digits(rnd);
+        stream << rnd;
 
-		//3. Which entity will be generated close bracket or operator?
-		while (open_brackets && !distr_0_1(random_engine))
-		{
-			--open_brackets;
-			++i;
-			stream << ")";
-		}
+        //3. Which entity will be generated close bracket or operator?
+        while (open_brackets && !distr_0_1(random_engine))
+        {
+            --open_brackets;
+            ++i;
+            stream << ")";
+        }
 
-		//4. Generate operator
-		stream << get_operator(operation_distr(random_engine));
-		++i;
-	}
+        //4. Generate operator
+        stream << get_operator(operation_distr(random_engine));
+        ++i;
+    }
 
-	//Finalize
-	stream << number_distr(random_engine);
-	for (i = 0; i < open_brackets; ++i) { stream << ')'; }
-	stream << '\n';
+    //Finalize
+    stream << number_distr(random_engine);
+    for (i = 0; i < open_brackets; ++i) { stream << ')'; }
+    stream << '\n';
 }
 
 int main(int argc, const char *argv[])

@@ -1,3 +1,10 @@
+/**
+ * This file contains unit-tests for NetCalcCore class.
+ * Tests set unit_test_mode flag in NetCalcCore instance and NetCalcCore mocks net operations.
+ * main function returns 0 if all test passed.
+ * main function returns 1 if one of test failed.
+ */
+
 #include <NetCalcCore.h>
 
 #include <string>

@@ -1,3 +1,7 @@
+/**
+ * This file contains program that measures time of expression evaluation.
+ */
+
 #include "ShuntingYard.h"
 
 #include <iostream>
