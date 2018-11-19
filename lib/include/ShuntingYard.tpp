@@ -245,6 +245,7 @@ template<class Type>
 std::string::const_iterator ShuntingYard<Type>::get_first_not_a_digit(std::string::const_iterator begin, std::string::const_iterator it_end)
 {
     //Return iterator to first not a digit or it_end.
+	//Note: std::string::find_first_not_of has complexity O(str1.size() * str2.size()) at worst.
     std::string::const_iterator it = begin;
     for (; it != it_end; ++it)
     {
