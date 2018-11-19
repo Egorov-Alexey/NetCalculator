@@ -50,6 +50,7 @@ Choose any free non-system port and set variable NC_FREE_TEST_PORT (a unit-test 
 ```shell
 export NC_FREE_TEST_PORT=8080
 ```
+Probably you will need to set BOOST_ROOT environment variable.
 
 Specify build type debug/release
 ```shell

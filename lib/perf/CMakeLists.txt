@@ -10,7 +10,7 @@ set (PERF_MODULE_PATH "${LIBRARY_MODULE_PATH}/perf")
 set (PERF_SRC_PATH  "${PERF_MODULE_PATH}/src" )
 
 #set includes
-include_directories (${LIBRARY_INCLUDE_PATH})
+include_directories (${LIBRARY_INCLUDE_PATH} ${Boost_INCLUDE_DIRS})
 
 #set perf sources
 file (GLOB PERF_SOURCE_FILES "${PERF_SRC_PATH}/*.cpp")

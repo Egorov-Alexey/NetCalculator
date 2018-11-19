@@ -10,7 +10,7 @@ set (TEST_MODULE_PATH "${LIBRARY_MODULE_PATH}/test")
 set (TEST_SRC_PATH  "${TEST_MODULE_PATH}/src" )
 
 #set includes
-include_directories (${LIBRARY_INCLUDE_PATH})
+include_directories (${LIBRARY_INCLUDE_PATH} ${Boost_INCLUDE_DIRS})
 
 #set test sources
 file (GLOB TEST_SOURCE_FILES "${TEST_SRC_PATH}/*.cpp")

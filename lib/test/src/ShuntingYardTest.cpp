@@ -71,6 +71,7 @@ bool ShuntingYardTest::test_get_first_not_a_digit()
     {
         std::cout << "Test ShuntingYardTest::test_get_first_not_a_digit passed" << std::endl;
     }
+	return !failed;
 }
 
 const ShuntingYardTest::ConvertTestCase ShuntingYardTest::convert_test_cases[] =
