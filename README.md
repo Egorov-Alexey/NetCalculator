@@ -1,19 +1,18 @@
 # Net calculator
 NetCalculator is an application used to long infix arithmetic expressions evaluation.
-NetCalculator is a server multithreaded application that keeps several simultaneous connections.
+NetCalculator is a multithreaded server application that can keep several simultaneous connections.
 
 ## Main highlights
 NetCalculator:
  - accepts TCP-connections;
  - receives an infix arithmetic expression, evaluates a result and sends it back;
- - evaluates an expression on the run;
+ - evaluates an expression on the fly (uses 2-stack modification of Shunting-yard Dijkstra's algorithm);
  - uses integer arithmetic (5/2 -> 2, 2/3 -> 0);
  - supports operations: +, -, *, /;
  - supports '(' and ')';
  - skips symbols '\t', '\r' and ' ' in a received expression;
  - considers '\n' as end of expression;
  - adds '\n' to each response;
- - uses 2-stack modification of Shunting-yard Dijkstra's algorithm;
  - can receive unified expression during several receive operations;
  - can receive and process several expressions during one receive operation;
  - doesn't close connection after sending correct result;
@@ -22,11 +21,9 @@ NetCalculator:
  - implements event-driven approach;
 
 ## Info
-It uses basic [C++14](https://isocpp.org/wiki/faq/cpp14-language) syntax.
-It uses [boost](https://www.boost.org/) library. Version 1.65.1 is used.
-[CMake](https://cmake.org/) is the chosen build system using [ctest](https://cmake.org/Wiki/CMake/Testing_With_CTest).
-Also bash is used for a unit-test.
-NetCalculagtor was build in Linux Ubuntu 18.0.4 and macOS 10.14.1
+It widly uses [C++14](https://isocpp.org/wiki/faq/cpp14-language) and [boost](https://www.boost.org/) library (1.65.1).
+[CMake](https://cmake.org/) is used as a build system for this project.
+Bash is used for a unit-test.
 
 ##  Project structure
 | folder       | Content              |
@@ -40,7 +37,7 @@ NetCalculagtor was build in Linux Ubuntu 18.0.4 and macOS 10.14.1
 | [/gen](/gen) | Random infix arithmetic expression generator |
 
 ## Get project
-Go to working directory and do command.
+Clone this repo. Run the following command.
 ```shell
 git clone https://github.com/Egorov-Alexey/NetCalculator.git
 ```
